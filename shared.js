@@ -999,6 +999,25 @@ async function sinkronData(silent = false, onSaved = null) {
 
     await kStorage.setJSON('ASSIGNMENTS', res.assignments);
 
+    // Hapus dulu SEMUA data siswa per kelas & per Halaqoh yang tersisa
+    // dari sinkron SEBELUMNYA, baru masukkan yang baru dari server --
+    // BEDA dengan sinkron nilai (lihat sinkronNilaiAspek() di aspek.html)
+    // yang hanya menimpa satu tag nilai yang sedang aktif, sinkron data
+    // guru ini harus bersih total. Alasannya: loop setJSON() di bawah
+    // hanya menimpa tag untuk kelas/Halaqoh yang MASIH ADA di respons
+    // baru -- kalau penugasan guru berkurang (mis. sudah tidak lagi
+    // mengajar kelas tertentu, atau daftar kelompok Halaqoh-nya
+    // menyusut), tag kelas/Halaqoh lama itu TIDAK PERNAH ditimpa dan
+    // akan tetap "nyangkut" selamanya di TinyDB kalau tidak dihapus
+    // eksplisit lebih dulu di sini. Prefix 'SISWA_' sengaja mencakup DUA
+    // tag sekaligus (lihat siswaTag() & siswaHalaqohTag(): keduanya
+    // sama-sama diawali 'SISWA_') -- pas, karena keduanya sama-sama
+    // perlu dibersihkan+diisi ulang total pada sinkron data guru ini.
+    const tagSiswaLama = await kStorage.list('SISWA_');
+    for (const tag of tagSiswaLama) {
+      await kStorage.delete(tag);
+    }
+
     const kelasList = Object.keys(res.siswaByKelas);
     for (const kelas of kelasList) {
       await kStorage.setJSON(siswaTag(kelas), res.siswaByKelas[kelas]);
@@ -1020,7 +1039,10 @@ async function sinkronData(silent = false, onSaved = null) {
     // HALAQOH (Musrif): daftar penugasan + roster siswa per kelompok --
     // sudah ikut dikembalikan oleh SATU aksi getSyncData di atas (lihat
     // getSyncData() di rekapDanSync.js), jadi di sini tinggal disimpan
-    // ke TinyDB. Tidak ada request API tambahan yang terpisah.
+    // ke TinyDB. Tidak ada request API tambahan yang terpisah. Tag
+    // SISWA_HALAQOH_* lama sudah dibersihkan bersamaan dengan SISWA_*
+    // kelas biasa di atas (lihat komentar di sana), jadi di sini tinggal
+    // tulis ulang yang baru -- tidak perlu delete lagi.
     // ==========================================
     const halaqohAssignments = res.halaqohAssignments || [];
     await kStorage.setJSON(halaqohAssignmentsTag(), halaqohAssignments);
