@@ -932,7 +932,7 @@
         </div>
 
         <div class="bacaan-section">
-          <div class="bacaan-title">Mulai (minimal isi salah satu)</div>
+          <div class="bacaan-title">Mulai (semua wajib diisi)</div>
           <div class="bacaan-grid">
             <div class="field-group">
               <label>Surah</label>
@@ -940,7 +940,7 @@
             </div>
             <div class="field-group">
               <label>Ayat</label>
-              <input type="number" id="mulaiAyat" inputmode="numeric" placeholder="-">
+              <select id="mulaiAyat"></select>
             </div>
             <div class="field-group">
               <label>Juz</label>
@@ -948,13 +948,13 @@
             </div>
             <div class="field-group">
               <label>Halaman</label>
-              <input type="number" id="mulaiHalaman" inputmode="numeric" placeholder="-">
+              <select id="mulaiHalaman"></select>
             </div>
           </div>
         </div>
 
         <div class="bacaan-section">
-          <div class="bacaan-title">Selesai (minimal isi salah satu)</div>
+          <div class="bacaan-title">Selesai (semua wajib diisi)</div>
           <div class="bacaan-grid">
             <div class="field-group">
               <label>Surah</label>
@@ -962,7 +962,7 @@
             </div>
             <div class="field-group">
               <label>Ayat</label>
-              <input type="number" id="selesaiAyat" inputmode="numeric" placeholder="-">
+              <select id="selesaiAyat"></select>
             </div>
             <div class="field-group">
               <label>Juz</label>
@@ -970,7 +970,7 @@
             </div>
             <div class="field-group">
               <label>Halaman</label>
-              <input type="number" id="selesaiHalaman" inputmode="numeric" placeholder="-">
+              <select id="selesaiHalaman"></select>
             </div>
           </div>
         </div>
@@ -1096,7 +1096,16 @@
       isiDropdownJenisEvaluasi();
       isiDropdownSurah();
       isiDropdownJuz();
+      isiDropdownHalaman();
+      isiDropdownAyat('mulaiSurah', 'mulaiAyat');
+      isiDropdownAyat('selesaiSurah', 'selesaiAyat');
       isiDropdownPredikatStatus();
+
+      // Setiap kali Surah diganti, pilihan Ayat menyesuaikan otomatis
+      // (dibatasi 1..jumlah ayat Surah tersebut) -- lihat isiDropdownAyat()
+      // di shared.js.
+      document.getElementById('mulaiSurah').addEventListener('change', () => isiDropdownAyat('mulaiSurah', 'mulaiAyat'));
+      document.getElementById('selesaiSurah').addEventListener('change', () => isiDropdownAyat('selesaiSurah', 'selesaiAyat'));
 
       loadAppHeaderFromCache();
       await muatDataHalaqoh();
@@ -1117,6 +1126,12 @@
       const opsi = '<option value="">-</option>' + JUZ_LIST.map(j => `<option value="${j}">${j}</option>`).join('');
       document.getElementById('mulaiJuz').innerHTML = opsi;
       document.getElementById('selesaiJuz').innerHTML = opsi;
+    }
+
+    function isiDropdownHalaman() {
+      const opsi = '<option value="">-</option>' + HALAMAN_LIST.map(h => `<option value="${h}">${h}</option>`).join('');
+      document.getElementById('mulaiHalaman').innerHTML = opsi;
+      document.getElementById('selesaiHalaman').innerHTML = opsi;
     }
 
     function isiDropdownPredikatStatus() {
@@ -1350,12 +1365,14 @@
       document.getElementById('mulaiSurah').value = mulai.surah || '';
       document.getElementById('mulaiJuz').value = mulai.juz || '';
       document.getElementById('mulaiHalaman').value = mulai.halaman || '';
-      document.getElementById('mulaiAyat').value = mulai.ayat || '';
+      // Bentuk ulang dropdown Ayat sesuai Surah yang baru saja diisi,
+      // sambil mencoba mempertahankan nilai Ayat lama (kalau masih valid).
+      isiDropdownAyat('mulaiSurah', 'mulaiAyat', mulai.ayat || '');
 
       document.getElementById('selesaiSurah').value = selesai.surah || '';
       document.getElementById('selesaiJuz').value = selesai.juz || '';
       document.getElementById('selesaiHalaman').value = selesai.halaman || '';
-      document.getElementById('selesaiAyat').value = selesai.ayat || '';
+      isiDropdownAyat('selesaiSurah', 'selesaiAyat', selesai.ayat || '');
 
       document.getElementById('inputPredikat').value = isEdit ? (entri.predikat || '') : '';
       document.getElementById('inputStatus').value = isEdit ? (entri.status || '') : '';
@@ -1431,27 +1448,26 @@
 
       const jenisEvaluasi = HAS_JENIS_EVALUASI ? document.getElementById('inputJenisEvaluasi').value : undefined;
 
-      const mulai = gabungBacaan(
-        document.getElementById('mulaiSurah').value,
-        document.getElementById('mulaiJuz').value,
-        document.getElementById('mulaiHalaman').value,
-        document.getElementById('mulaiAyat').value
-      );
-      const selesai = gabungBacaan(
-        document.getElementById('selesaiSurah').value,
-        document.getElementById('selesaiJuz').value,
-        document.getElementById('selesaiHalaman').value,
-        document.getElementById('selesaiAyat').value
-      );
+      const mulaiSurah = document.getElementById('mulaiSurah').value;
+      const mulaiJuz = document.getElementById('mulaiJuz').value;
+      const mulaiHalaman = document.getElementById('mulaiHalaman').value;
+      const mulaiAyat = document.getElementById('mulaiAyat').value;
+      const selesaiSurah = document.getElementById('selesaiSurah').value;
+      const selesaiJuz = document.getElementById('selesaiJuz').value;
+      const selesaiHalaman = document.getElementById('selesaiHalaman').value;
+      const selesaiAyat = document.getElementById('selesaiAyat').value;
 
-      if (!mulai) {
-        await showAlert('Bagian "Mulai" wajib diisi minimal salah satu (Surah/Juz/Halaman/Ayat).', 'Data Belum Lengkap');
+      if (!mulaiSurah || !mulaiAyat || !mulaiJuz || !mulaiHalaman) {
+        await showAlert('Bagian "Mulai" wajib diisi lengkap (Surah, Ayat, Juz, dan Halaman).', 'Data Belum Lengkap');
         return;
       }
-      if (!selesai) {
-        await showAlert('Bagian "Selesai" wajib diisi minimal salah satu (Surah/Juz/Halaman/Ayat).', 'Data Belum Lengkap');
+      if (!selesaiSurah || !selesaiAyat || !selesaiJuz || !selesaiHalaman) {
+        await showAlert('Bagian "Selesai" wajib diisi lengkap (Surah, Ayat, Juz, dan Halaman).', 'Data Belum Lengkap');
         return;
       }
+
+      const mulai = gabungBacaan(mulaiSurah, mulaiJuz, mulaiHalaman, mulaiAyat);
+      const selesai = gabungBacaan(selesaiSurah, selesaiJuz, selesaiHalaman, selesaiAyat);
 
       const predikat = document.getElementById('inputPredikat').value;
       const status = document.getElementById('inputStatus').value;
