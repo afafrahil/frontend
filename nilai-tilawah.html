@@ -797,6 +797,108 @@
       background: #fff;
     }
 
+    /* Combo box kustom untuk field Halaman: trigger mirip <select>,
+       saat diklik membuka panel berisi kotak pencarian/input manual
+       di atas + daftar saran halaman yang bisa discroll di bawahnya
+       (lihat isiDropdownHalaman() & setupHalamanCombo() di shared.js). */
+    .halaman-combo {
+      position: relative;
+    }
+
+    .halaman-combo-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f8fafc;
+      cursor: pointer;
+      user-select: none;
+      box-sizing: border-box;
+    }
+
+    .halaman-combo-trigger span:first-child {
+      color: var(--text-main);
+    }
+
+    .halaman-combo.open .halaman-combo-trigger,
+    .halaman-combo-trigger:focus {
+      border-color: var(--primary);
+      outline: none;
+      background: #fff;
+    }
+
+    .halaman-combo-caret {
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-left: 6px;
+      transition: transform 0.15s ease;
+    }
+
+    .halaman-combo.open .halaman-combo-caret {
+      transform: rotate(180deg);
+      color: var(--primary);
+    }
+
+    .halaman-combo-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 20;
+      background: #fff;
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+    }
+
+    .halaman-combo.open .halaman-combo-panel {
+      display: block;
+    }
+
+    .halaman-combo-input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+      outline: none;
+      background: #fff;
+    }
+
+    .halaman-combo-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .halaman-combo-list {
+      max-height: 170px;
+      overflow-y: auto;
+    }
+
+    .halaman-combo-item {
+      padding: 9px 10px;
+      font-size: 14px;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .halaman-combo-item:hover {
+      background: #eef7f2;
+    }
+
+    .halaman-combo-item.active {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
     .form-row {
       margin-bottom: 14px;
     }
@@ -944,8 +1046,16 @@
             </div>
             <div class="field-group">
               <label>Halaman</label>
-              <input type="number" id="mulaiHalaman" list="mulaiHalamanList" min="1" max="604" placeholder="Halaman">
-              <datalist id="mulaiHalamanList"></datalist>
+              <div class="halaman-combo" id="mulaiHalamanCombo">
+                <div class="halaman-combo-trigger" id="mulaiHalamanTrigger" tabindex="0">
+                  <span id="mulaiHalamanTriggerText">Pilih Halaman</span>
+                  <span class="halaman-combo-caret">&#9662;</span>
+                </div>
+                <div class="halaman-combo-panel" id="mulaiHalamanPanel">
+                  <input type="number" id="mulaiHalaman" class="halaman-combo-input" min="1" max="604" placeholder="Ketik nomor halaman...">
+                  <div class="halaman-combo-list" id="mulaiHalamanList"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -967,8 +1077,16 @@
             </div>
             <div class="field-group">
               <label>Halaman</label>
-              <input type="number" id="selesaiHalaman" list="selesaiHalamanList" min="1" max="604" placeholder="Halaman">
-              <datalist id="selesaiHalamanList"></datalist>
+              <div class="halaman-combo" id="selesaiHalamanCombo">
+                <div class="halaman-combo-trigger" id="selesaiHalamanTrigger" tabindex="0">
+                  <span id="selesaiHalamanTriggerText">Pilih Halaman</span>
+                  <span class="halaman-combo-caret">&#9662;</span>
+                </div>
+                <div class="halaman-combo-panel" id="selesaiHalamanPanel">
+                  <input type="number" id="selesaiHalaman" class="halaman-combo-input" min="1" max="604" placeholder="Ketik nomor halaman...">
+                  <div class="halaman-combo-list" id="selesaiHalamanList"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1098,6 +1216,8 @@
       isiDropdownJuz('selesaiSurah', 'selesaiAyat', 'selesaiJuz');
       isiDropdownHalaman('mulaiJuz', 'mulaiHalaman');
       isiDropdownHalaman('selesaiJuz', 'selesaiHalaman');
+      setupHalamanCombo('mulaiHalaman');
+      setupHalamanCombo('selesaiHalaman');
       isiDropdownPredikatStatus();
 
       // Rantai Surah -> Ayat -> Juz -> Halaman dibangun ulang tiap kali
@@ -1367,6 +1487,7 @@
     }
 
     function closeModalNilai() {
+      tutupSemuaHalamanCombo_();
       document.getElementById('modalNilai').classList.remove('active');
       document.getElementById('inputWaktu').disabled = false;
       entriAktifForm = null;

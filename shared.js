@@ -131,7 +131,8 @@ const JUZ_HALAMAN_AWAL = [
   302, 322, 342, 362, 382, 402, 422, 442, 462, 482, 502, 522, 542, 562, 582
 ];
 
-// Isi ulang <datalist> saran Halaman untuk field <input> (id
+// Isi ulang daftar saran Halaman (combo box kustom -- lihat
+// setupHalamanCombo() di bawah) untuk field <input type="number"> (id
 // `halamanInputId`) berdasarkan Juz yang sedang dipilih di <select>
 // `juzSelectId` -- daftar sarannya otomatis dibatasi ke rentang halaman
 // Juz itu (~20 opsi, sesuai Mushaf Madinah standar, tanpa toleransi --
@@ -140,9 +141,10 @@ const JUZ_HALAMAN_AWAL = [
 // (mode edit) dan setiap kali user mengganti pilihan Juz (listener
 // 'change', lihat nilai-tahfidz.html/nilai-tilawah.html).
 //
-// Field Halaman berupa <input type="number"> + <datalist> (BUKAN
-// <select>) -- daftar ini hanya SARAN, guru tetap bisa mengetik angka
-// halaman berapa pun di luar saran (mis. kalau cetakan mushaf yang
+// Field Halaman berupa <input type="number"> di dalam combo box kustom
+// (BUKAN <select> polos) -- daftar di panel-nya hanya SARAN, guru tetap
+// bisa mengetik angka halaman berapa pun di luar saran lewat kotak
+// pencarian di bagian atas panel (mis. kalau cetakan mushaf yang
 // dipakai sedikit berbeda dari standar Madinah). Karena itu TIDAK ADA
 // toleransi ±1 di sini lagi (beda dengan versi sebelumnya) -- kalau
 // perlu halaman di luar rentang Juz, guru tinggal ketik manual, dan
@@ -156,7 +158,7 @@ function isiDropdownHalaman(juzSelectId, halamanInputId, nilaiTerpilih) {
   const juzSel = document.getElementById(juzSelectId);
   const halamanInput = document.getElementById(halamanInputId);
   if (!halamanInput) return;
-  const datalistEl = document.getElementById(halamanInput.getAttribute('list'));
+  const listEl = document.getElementById(halamanInputId + 'List');
 
   let awal = 1, akhir = TOTAL_HALAMAN_MUSHAF;
   const juzVal = juzSel ? Number(juzSel.value) : NaN;
@@ -165,15 +167,118 @@ function isiDropdownHalaman(juzSelectId, halamanInputId, nilaiTerpilih) {
     akhir = (juzVal < 30) ? (JUZ_HALAMAN_AWAL[juzVal] - 1) : TOTAL_HALAMAN_MUSHAF;
   }
 
-  if (datalistEl) {
+  if (listEl) {
     let opsi = '';
-    for (let h = awal; h <= akhir; h++) opsi += `<option value="${h}">`;
-    datalistEl.innerHTML = opsi;
+    for (let h = awal; h <= akhir; h++) {
+      opsi += `<div class="halaman-combo-item" data-nilai="${h}">${h}</div>`;
+    }
+    listEl.innerHTML = opsi;
   }
 
   const nilaiSekarang = (nilaiTerpilih !== undefined) ? nilaiTerpilih : halamanInput.value;
   halamanInput.value = nilaiSekarang || '';
+  perbaruiHalamanComboTampilan_(halamanInputId);
 }
+
+// Sinkronkan teks yang tampil di "trigger" combo box Halaman (id
+// `halamanInputId` + 'Trigger') dan sorotan item aktif di panelnya
+// dengan nilai <input> saat ini -- dipanggil dari isiDropdownHalaman()
+// dan dari event 'input' pada kotak pencarian (lihat setupHalamanCombo()).
+function perbaruiHalamanComboTampilan_(halamanInputId) {
+  const halamanInput = document.getElementById(halamanInputId);
+  const triggerText = document.getElementById(halamanInputId + 'TriggerText');
+  const listEl = document.getElementById(halamanInputId + 'List');
+  if (!halamanInput) return;
+
+  if (triggerText) {
+    triggerText.textContent = halamanInput.value ? `Halaman ${halamanInput.value}` : 'Pilih Halaman';
+  }
+  if (listEl) {
+    listEl.querySelectorAll('.halaman-combo-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.nilai === String(halamanInput.value));
+    });
+  }
+}
+
+// Pasang interaksi combo box kustom Halaman (trigger buka/tutup panel,
+// pencarian/filter daftar sekaligus jadi kotak input manual, klik item
+// untuk memilih, klik di luar/Escape untuk menutup) untuk satu field
+// (id `halamanInputId`, mis. 'mulaiHalaman' atau 'selesaiHalaman').
+// Dipanggil sekali per field saat halaman dimuat (lihat
+// nilai-tahfidz.html/nilai-tilawah.html) -- struktur HTML yang
+// dibutuhkan (lihat kedua file itu untuk contoh markup-nya):
+//   <div class="halaman-combo" id="{id}Combo">
+//     <div class="halaman-combo-trigger" id="{id}Trigger">
+//       <span id="{id}TriggerText">Pilih Halaman</span>
+//       <span class="halaman-combo-caret">&#9662;</span>
+//     </div>
+//     <div class="halaman-combo-panel" id="{id}Panel">
+//       <input type="number" id="{id}" class="halaman-combo-input" ...>
+//       <div class="halaman-combo-list" id="{id}List"></div>
+//     </div>
+//   </div>
+function setupHalamanCombo(halamanInputId) {
+  const combo = document.getElementById(halamanInputId + 'Combo');
+  const trigger = document.getElementById(halamanInputId + 'Trigger');
+  const panel = document.getElementById(halamanInputId + 'Panel');
+  const input = document.getElementById(halamanInputId);
+  const listEl = document.getElementById(halamanInputId + 'List');
+  if (!combo || !trigger || !panel || !input || !listEl) return;
+
+  const bukaPanel = () => {
+    tutupSemuaHalamanCombo_();
+    combo.classList.add('open');
+    input.focus();
+  };
+  const tutupPanel = () => combo.classList.remove('open');
+
+  trigger.addEventListener('click', () => {
+    combo.classList.contains('open') ? tutupPanel() : bukaPanel();
+  });
+
+  // Kotak di dalam panel ini SEKALIGUS berfungsi sebagai (1) filter
+  // pencarian daftar saran di bawahnya, dan (2) input manual -- angka
+  // yang diketik di sini LANGSUNG jadi nilai field, tidak perlu
+  // ditemukan/diklik dari daftar dulu (lihat komentar isiDropdownHalaman()).
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    listEl.querySelectorAll('.halaman-combo-item').forEach(item => {
+      item.style.display = (!q || item.dataset.nilai.includes(q)) ? '' : 'none';
+    });
+    perbaruiHalamanComboTampilan_(halamanInputId);
+  });
+  input.addEventListener('focus', bukaPanel);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); tutupPanel(); }
+    else if (e.key === 'Escape') { tutupPanel(); }
+  });
+
+  listEl.addEventListener('click', (e) => {
+    const item = e.target.closest('.halaman-combo-item');
+    if (!item) return;
+    input.value = item.dataset.nilai;
+    perbaruiHalamanComboTampilan_(halamanInputId);
+    tutupPanel();
+  });
+
+  _halamanComboRegistry_.push(tutupPanel);
+}
+
+// Daftar fungsi "tutup panel" dari semua combo box Halaman yang sudah
+// dipasang setupHalamanCombo() -- dipakai tutupSemuaHalamanCombo_() dan
+// listener klik-di-luar/Escape global di bawah supaya membuka satu
+// combo otomatis menutup combo lain, dan supaya closeModalNilai() di
+// nilai-tahfidz.html/nilai-tilawah.html bisa menutup semuanya sekaligus.
+const _halamanComboRegistry_ = [];
+function tutupSemuaHalamanCombo_() {
+  _halamanComboRegistry_.forEach(tutup => tutup());
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.halaman-combo')) tutupSemuaHalamanCombo_();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') tutupSemuaHalamanCombo_();
+});
 
 // Isi ulang <select> Juz (id `juzSelectId`) berdasarkan kombinasi Surah +
 // Ayat yang sedang dipilih (`surahSelectId` + `ayatSelectId`). Pasangan
