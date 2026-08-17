@@ -52,16 +52,17 @@ const PREDIKAT_HALAQOH_LIST = ['A', 'B', 'C'];
 const STATUS_HALAQOH_LIST = ['Lulus', 'Lanjut', 'Ulang'];
 const JENIS_EVALUASI_TAHFIDZ_LIST = ['Ziadah', 'Murojaah'];
 
-// Gabungkan 4 parameter (Surah/Juz/Halaman/Ayat) jadi satu teks,
-// format persis seperti yang dipakai manual di spreadsheet:
-// "Surah Al-Baqarah, Juz 1, Hal 5, Ayat 10" -- minimal satu parameter
-// harus diisi, bagian yang kosong tidak ikut ditulis.
+// Gabungkan 4 parameter (Surah/Ayat/Juz/Halaman) jadi satu teks,
+// urutan mengikuti tampilan form input (nilai-tahfidz.html &
+// nilai-tilawah.html): "Surah Al-Baqarah, Ayat 10, Juz 1, Hal 5"
+// -- minimal satu parameter harus diisi, bagian yang kosong tidak
+// ikut ditulis.
 function gabungBacaan(surah, juz, halaman, ayat) {
   const parts = [];
   if (surah) parts.push('Surah ' + surah);
+  if (ayat) parts.push('Ayat ' + ayat);
   if (juz) parts.push('Juz ' + juz);
   if (halaman) parts.push('Hal ' + halaman);
-  if (ayat) parts.push('Ayat ' + ayat);
   return parts.join(', ');
 }
 
