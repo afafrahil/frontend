@@ -1095,17 +1095,24 @@
 
       isiDropdownJenisEvaluasi();
       isiDropdownSurah();
-      isiDropdownJuz();
-      isiDropdownHalaman();
       isiDropdownAyat('mulaiSurah', 'mulaiAyat');
       isiDropdownAyat('selesaiSurah', 'selesaiAyat');
+      isiDropdownJuz('mulaiSurah', 'mulaiAyat', 'mulaiJuz');
+      isiDropdownJuz('selesaiSurah', 'selesaiAyat', 'selesaiJuz');
+      isiDropdownHalaman('mulaiJuz', 'mulaiHalaman');
+      isiDropdownHalaman('selesaiJuz', 'selesaiHalaman');
       isiDropdownPredikatStatus();
 
-      // Setiap kali Surah diganti, pilihan Ayat menyesuaikan otomatis
-      // (dibatasi 1..jumlah ayat Surah tersebut) -- lihat isiDropdownAyat()
-      // di shared.js.
-      document.getElementById('mulaiSurah').addEventListener('change', () => isiDropdownAyat('mulaiSurah', 'mulaiAyat'));
-      document.getElementById('selesaiSurah').addEventListener('change', () => isiDropdownAyat('selesaiSurah', 'selesaiAyat'));
+      // Rantai Surah -> Ayat -> Juz -> Halaman dibangun ulang tiap kali
+      // salah satu dari Surah/Ayat/Juz diganti, dari arah manapun
+      // perubahan itu dimulai -- lihat perbaruiRantaiBacaan() di shared.js.
+      document.getElementById('mulaiSurah').addEventListener('change', () => perbaruiRantaiBacaan('mulai'));
+      document.getElementById('mulaiAyat').addEventListener('change', () => perbaruiRantaiBacaan('mulai'));
+      document.getElementById('mulaiJuz').addEventListener('change', () => perbaruiRantaiBacaan('mulai'));
+
+      document.getElementById('selesaiSurah').addEventListener('change', () => perbaruiRantaiBacaan('selesai'));
+      document.getElementById('selesaiAyat').addEventListener('change', () => perbaruiRantaiBacaan('selesai'));
+      document.getElementById('selesaiJuz').addEventListener('change', () => perbaruiRantaiBacaan('selesai'));
 
       loadAppHeaderFromCache();
       await muatDataHalaqoh();
@@ -1120,18 +1127,6 @@
       const opsi = '<option value="">-</option>' + SURAH_LIST.map(s => `<option value="${s}">${s}</option>`).join('');
       document.getElementById('mulaiSurah').innerHTML = opsi;
       document.getElementById('selesaiSurah').innerHTML = opsi;
-    }
-
-    function isiDropdownJuz() {
-      const opsi = '<option value="">-</option>' + JUZ_LIST.map(j => `<option value="${j}">${j}</option>`).join('');
-      document.getElementById('mulaiJuz').innerHTML = opsi;
-      document.getElementById('selesaiJuz').innerHTML = opsi;
-    }
-
-    function isiDropdownHalaman() {
-      const opsi = '<option value="">-</option>' + HALAMAN_LIST.map(h => `<option value="${h}">${h}</option>`).join('');
-      document.getElementById('mulaiHalaman').innerHTML = opsi;
-      document.getElementById('selesaiHalaman').innerHTML = opsi;
     }
 
     function isiDropdownPredikatStatus() {
@@ -1363,16 +1358,17 @@
       const selesai = uraiBacaan(isEdit ? entri.selesai : '');
 
       document.getElementById('mulaiSurah').value = mulai.surah || '';
-      document.getElementById('mulaiJuz').value = mulai.juz || '';
-      document.getElementById('mulaiHalaman').value = mulai.halaman || '';
-      // Bentuk ulang dropdown Ayat sesuai Surah yang baru saja diisi,
-      // sambil mencoba mempertahankan nilai Ayat lama (kalau masih valid).
+      // Bentuk ulang dropdown Ayat, Juz & Halaman berantai sesuai data
+      // yang baru saja diisi, sambil mencoba mempertahankan nilai lama
+      // masing-masing (kalau masih valid untuk rentang barunya).
       isiDropdownAyat('mulaiSurah', 'mulaiAyat', mulai.ayat || '');
+      isiDropdownJuz('mulaiSurah', 'mulaiAyat', 'mulaiJuz', mulai.juz || '');
+      isiDropdownHalaman('mulaiJuz', 'mulaiHalaman', mulai.halaman || '');
 
       document.getElementById('selesaiSurah').value = selesai.surah || '';
-      document.getElementById('selesaiJuz').value = selesai.juz || '';
-      document.getElementById('selesaiHalaman').value = selesai.halaman || '';
       isiDropdownAyat('selesaiSurah', 'selesaiAyat', selesai.ayat || '');
+      isiDropdownJuz('selesaiSurah', 'selesaiAyat', 'selesaiJuz', selesai.juz || '');
+      isiDropdownHalaman('selesaiJuz', 'selesaiHalaman', selesai.halaman || '');
 
       document.getElementById('inputPredikat').value = isEdit ? (entri.predikat || '') : '';
       document.getElementById('inputStatus').value = isEdit ? (entri.status || '') : '';
