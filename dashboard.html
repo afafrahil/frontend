@@ -441,7 +441,7 @@
     .card-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 5px;
       overflow-y: auto;
       flex: 1;
       min-height: 0;
@@ -464,15 +464,34 @@
       background: #f8fafc;
     }
 
-    .item-title {
-      font-weight: 600;
-      font-size: 15px;
-      margin-bottom: 4px;
+    .item-text {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: 6px;
+      row-gap: 2px;
+      flex: 1;
+      min-width: 0;
     }
 
-    .item-subtitle {
-      font-size: 13px;
+    .item-kelas {
+      font-weight: 600;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+
+    .item-kelas::after {
+      content: "|";
+      margin-left: 6px;
       color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .item-mapel {
+      font-weight: 600;
+      font-size: 15px;
+      min-width: 0;
+      overflow-wrap: break-word;
     }
 
     /* ============================
@@ -781,9 +800,8 @@
         const card = document.createElement('div');
         card.className = 'item-card';
         card.innerHTML = `
-          <div>
-            <div class="item-title">${a.mapel}</div>
-            <div class="item-subtitle">Kelas ${a.kelas}</div>
+          <div class="item-text">
+            <span class="item-kelas">Kelas ${a.kelas}</span><span class="item-mapel">${a.mapel}</span>
           </div>
           <div style="color: var(--primary); font-weight: bold;">&rarr;</div>
         `;
