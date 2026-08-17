@@ -944,7 +944,8 @@
             </div>
             <div class="field-group">
               <label>Halaman</label>
-              <select id="mulaiHalaman"></select>
+              <input type="number" id="mulaiHalaman" list="mulaiHalamanList" min="1" max="604" placeholder="Halaman">
+              <datalist id="mulaiHalamanList"></datalist>
             </div>
           </div>
         </div>
@@ -966,7 +967,8 @@
             </div>
             <div class="field-group">
               <label>Halaman</label>
-              <select id="selesaiHalaman"></select>
+              <input type="number" id="selesaiHalaman" list="selesaiHalamanList" min="1" max="604" placeholder="Halaman">
+              <datalist id="selesaiHalamanList"></datalist>
             </div>
           </div>
         </div>
@@ -1445,6 +1447,13 @@
       }
       if (!selesaiSurah || !selesaiAyat || !selesaiJuz || !selesaiHalaman) {
         await showAlert('Bagian "Selesai" wajib diisi lengkap (Surah, Ayat, Juz, dan Halaman).', 'Data Belum Lengkap');
+        return;
+      }
+      // Halaman bisa diisi manual (bukan cuma dari daftar saran), jadi
+      // divalidasi terpisah supaya tetap dalam rentang halaman mushaf.
+      if (Number(mulaiHalaman) < 1 || Number(mulaiHalaman) > TOTAL_HALAMAN_MUSHAF ||
+          Number(selesaiHalaman) < 1 || Number(selesaiHalaman) > TOTAL_HALAMAN_MUSHAF) {
+        await showAlert(`Halaman harus di antara 1 dan ${TOTAL_HALAMAN_MUSHAF}.`, 'Data Tidak Valid');
         return;
       }
 

@@ -131,61 +131,68 @@ const JUZ_HALAMAN_AWAL = [
   302, 322, 342, 362, 382, 402, 422, 442, 462, 482, 502, 522, 542, 562, 582
 ];
 
-// Isi ulang <select> Halaman (id `halamanSelectId`) berdasarkan Juz yang
-// sedang dipilih di <select> `juzSelectId` -- pilihannya otomatis
-// dibatasi ke rentang halaman Juz itu. Kalau Juz belum dipilih, dropdown
-// menampilkan rentang penuh 1..604. Dipanggil sekali saat modal
-// dibuka/diisi ulang (mode edit) dan setiap kali user mengganti pilihan
-// Juz (listener 'change', lihat nilai-tahfidz.html/nilai-tilawah.html).
+// Isi ulang <datalist> saran Halaman untuk field <input> (id
+// `halamanInputId`) berdasarkan Juz yang sedang dipilih di <select>
+// `juzSelectId` -- daftar sarannya otomatis dibatasi ke rentang halaman
+// Juz itu (~20 opsi, sesuai Mushaf Madinah standar, tanpa toleransi --
+// lihat catatan di bawah). Kalau Juz belum dipilih, saran menampilkan
+// rentang penuh 1..604. Dipanggil sekali saat modal dibuka/diisi ulang
+// (mode edit) dan setiap kali user mengganti pilihan Juz (listener
+// 'change', lihat nilai-tahfidz.html/nilai-tilawah.html).
 //
-// TOLERANSI PERBEDAAN CETAKAN: batas awal & akhir Juz bisa bergeser 1
-// halaman tergantung cetakan mushaf yang dipakai, jadi rentang di sini
-// ditambah 1 halaman di depan dan 1 halaman di belakang -- KECUALI Juz 1,
-// yang batas awalnya sudah pasti halaman pertama mushaf (tidak ada
-// toleransi di depan maupun belakang untuk Juz 1).
+// Field Halaman berupa <input type="number"> + <datalist> (BUKAN
+// <select>) -- daftar ini hanya SARAN, guru tetap bisa mengetik angka
+// halaman berapa pun di luar saran (mis. kalau cetakan mushaf yang
+// dipakai sedikit berbeda dari standar Madinah). Karena itu TIDAK ADA
+// toleransi ±1 di sini lagi (beda dengan versi sebelumnya) -- kalau
+// perlu halaman di luar rentang Juz, guru tinggal ketik manual, dan
+// nilai yang sudah diketik TIDAK dihapus/divalidasi ulang terhadap
+// rentang Juz (beda dengan Ayat/Juz yang tetap dikunci pada pasangan
+// yang valid).
 //
-// `nilaiTerpilih` (opsional): sama seperti isiDropdownAyat() -- dipakai
-// saat mengisi ulang form pada mode edit supaya nilai Halaman lama tetap
-// terpilih kalau masih berada dalam rentang Juz itu.
-function isiDropdownHalaman(juzSelectId, halamanSelectId, nilaiTerpilih) {
+// `nilaiTerpilih` (opsional): dipakai saat mengisi ulang form pada mode
+// edit supaya nilai Halaman lama tetap ditampilkan apa adanya.
+function isiDropdownHalaman(juzSelectId, halamanInputId, nilaiTerpilih) {
   const juzSel = document.getElementById(juzSelectId);
-  const halamanSel = document.getElementById(halamanSelectId);
-  if (!halamanSel) return;
+  const halamanInput = document.getElementById(halamanInputId);
+  if (!halamanInput) return;
+  const datalistEl = document.getElementById(halamanInput.getAttribute('list'));
 
   let awal = 1, akhir = TOTAL_HALAMAN_MUSHAF;
   const juzVal = juzSel ? Number(juzSel.value) : NaN;
   if (juzVal >= 1 && juzVal <= 30) {
     awal = JUZ_HALAMAN_AWAL[juzVal - 1];
     akhir = (juzVal < 30) ? (JUZ_HALAMAN_AWAL[juzVal] - 1) : TOTAL_HALAMAN_MUSHAF;
-    if (juzVal !== 1) {
-      awal = Math.max(1, awal - 1);
-      akhir = Math.min(TOTAL_HALAMAN_MUSHAF, akhir + 1);
-    }
   }
 
-  const nilaiSekarang = (nilaiTerpilih !== undefined) ? nilaiTerpilih : halamanSel.value;
+  if (datalistEl) {
+    let opsi = '';
+    for (let h = awal; h <= akhir; h++) opsi += `<option value="${h}">`;
+    datalistEl.innerHTML = opsi;
+  }
 
-  let opsi = '<option value="">-</option>';
-  for (let h = awal; h <= akhir; h++) opsi += `<option value="${h}">${h}</option>`;
-  halamanSel.innerHTML = opsi;
-  const n = Number(nilaiSekarang);
-  halamanSel.value = (nilaiSekarang && n >= awal && n <= akhir) ? String(nilaiSekarang) : '';
+  const nilaiSekarang = (nilaiTerpilih !== undefined) ? nilaiTerpilih : halamanInput.value;
+  halamanInput.value = nilaiSekarang || '';
 }
 
 // Isi ulang <select> Juz (id `juzSelectId`) berdasarkan kombinasi Surah +
-// Ayat yang sedang dipilih (`surahSelectId` + `ayatSelectId`) -- pilihan
-// Juz otomatis dipersempit ke sekitar Juz hasil hitungan. Kalau Surah
-// atau Ayat belum lengkap dipilih, dropdown menampilkan rentang penuh
-// 1..30 (tidak dibatasi).
+// Ayat yang sedang dipilih (`surahSelectId` + `ayatSelectId`). Pasangan
+// Surah-Ayat-Juz sudah baku/disepakati (tidak seperti Halaman yang bisa
+// beda antar cetakan mushaf), jadi TIDAK ADA toleransi ±1 di sini --
+// dropdown selalu presisi sesuai kondisi berikut:
 //
-// TOLERANSI PERBEDAAN CETAKAN: sama seperti isiDropdownHalaman(), Juz
-// hasil hitungan dilebarkan 1 Juz ke atas & 1 Juz ke bawah (dibatasi
-// 1-30) -- karena ayat yang persis di batas awal/akhir Juz bisa
-// tergolong Juz yang berbeda tergantung cetakan mushaf.
+//   1. Surah BELUM dipilih          -> rentang penuh 1..30 (bebas)
+//   2. Surah dipilih, Ayat belum    -> rentang Juz yang DILALUI Surah
+//                                       itu (dari ayat 1 s/d ayat
+//                                       terakhir Surah tsb) -- karena
+//                                       satu Surah panjang bisa
+//                                       melintasi beberapa Juz
+//   3. Surah + Ayat lengkap dipilih -> HANYA 1 opsi (hasil hitung
+//                                       cariJuzDariAyat_() yang presisi)
 //
 // `nilaiTerpilih` (opsional): sama seperti isiDropdownAyat() -- dipakai
 // saat mengisi ulang form pada mode edit supaya nilai Juz lama tetap
-// terpilih kalau masih berada dalam rentang hasil hitungan ini.
+// terpilih kalau masih berada dalam rentang di atas.
 function isiDropdownJuz(surahSelectId, ayatSelectId, juzSelectId, nilaiTerpilih) {
   const surahSel = document.getElementById(surahSelectId);
   const ayatSel = document.getElementById(ayatSelectId);
@@ -195,13 +202,19 @@ function isiDropdownJuz(surahSelectId, ayatSelectId, juzSelectId, nilaiTerpilih)
   let awal = 1, akhir = 30;
   const surahIdx = surahSel ? SURAH_LIST.indexOf(surahSel.value) : -1;
   const ayatVal = ayatSel ? Number(ayatSel.value) : NaN;
+
   if (surahIdx >= 0 && ayatVal >= 1) {
+    // Kondisi 3: Surah + Ayat lengkap -> presisi, 1 opsi
     const juzHitung = cariJuzDariAyat_(surahIdx, ayatVal);
-    if (juzHitung) {
-      awal = Math.max(1, juzHitung - 1);
-      akhir = Math.min(30, juzHitung + 1);
-    }
+    if (juzHitung) { awal = akhir = juzHitung; }
+  } else if (surahIdx >= 0) {
+    // Kondisi 2: Surah saja -> rentang Juz yang dilalui Surah ini
+    const jumlahAyatSurah = JUMLAH_AYAT_SURAH[surahIdx];
+    const juzAwal = cariJuzDariAyat_(surahIdx, 1);
+    const juzAkhir = cariJuzDariAyat_(surahIdx, jumlahAyatSurah);
+    if (juzAwal && juzAkhir) { awal = juzAwal; akhir = juzAkhir; }
   }
+  // Kondisi 1 (surahIdx < 0): biarkan awal=1, akhir=30 (default di atas)
 
   const nilaiSekarang = (nilaiTerpilih !== undefined) ? nilaiTerpilih : juzSel.value;
 
@@ -219,6 +232,11 @@ function isiDropdownJuz(surahSelectId, ayatSelectId, juzSelectId, nilaiTerpilih)
 // mengganti pilihan Surah, Ayat, ATAU Juz (lihat listener 'change' di
 // nilai-tahfidz.html/nilai-tilawah.html) supaya seluruh rantai selalu
 // konsisten satu sama lain, dari arah manapun perubahan itu dimulai.
+//
+// Surah -> Ayat -> Juz dihitung presisi tanpa toleransi (lihat
+// isiDropdownAyat/isiDropdownJuz). Hanya Halaman yang tetap berupa
+// saran (via <datalist>) karena bisa beda antar cetakan mushaf -- guru
+// bebas mengetik angka Halaman lain di luar saran itu.
 function perbaruiRantaiBacaan(prefix) {
   isiDropdownAyat(prefix + 'Surah', prefix + 'Ayat');
   isiDropdownJuz(prefix + 'Surah', prefix + 'Ayat', prefix + 'Juz');
@@ -230,6 +248,9 @@ function perbaruiRantaiBacaan(prefix) {
 // 1..jumlah ayat Surah itu. Dipanggil sekali saat modal dibuka/diisi
 // ulang (mode edit) dan setiap kali user mengganti pilihan Surah
 // (listener 'change', lihat nilai-tahfidz.html/nilai-tilawah.html).
+//
+// Selama Surah belum dipilih, dropdown Ayat DIKUNCI (disabled) --
+// guru tidak bisa mengklik/memilih Ayat sebelum Surah-nya jelas.
 //
 // `nilaiTerpilih` (opsional): dipakai khusus saat mengisi ulang form
 // pada mode edit, untuk mencoba mempertahankan nilai Ayat yang sudah
@@ -247,8 +268,10 @@ function isiDropdownAyat(surahSelectId, ayatSelectId, nilaiTerpilih) {
 
   if (!jumlahAyat) {
     ayatSel.innerHTML = '<option value="">-</option>';
+    ayatSel.disabled = true;
     return;
   }
+  ayatSel.disabled = false;
 
   let opsi = '<option value="">-</option>';
   for (let a = 1; a <= jumlahAyat; a++) opsi += `<option value="${a}">${a}</option>`;
