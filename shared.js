@@ -328,6 +328,7 @@ function isiDropdownJuz(surahSelectId, ayatSelectId, juzSelectId, nilaiTerpilih)
   juzSel.innerHTML = opsi;
   const n = Number(nilaiSekarang);
   juzSel.value = (nilaiSekarang && n >= awal && n <= akhir) ? String(nilaiSekarang) : '';
+  renderSearchableCombo(juzSelectId);
 }
 
 // Bangun ulang seluruh rantai dropdown Surah -> Ayat -> Juz -> Halaman
@@ -382,6 +383,141 @@ function isiDropdownAyat(surahSelectId, ayatSelectId, nilaiTerpilih) {
   for (let a = 1; a <= jumlahAyat; a++) opsi += `<option value="${a}">${a}</option>`;
   ayatSel.innerHTML = opsi;
   ayatSel.value = (nilaiSekarang && Number(nilaiSekarang) <= jumlahAyat) ? String(nilaiSekarang) : '';
+  renderSearchableCombo(ayatSelectId);
+}
+
+// ==========================================
+// COMBO BOX KUSTOM "CARI DARI OPSI" (Surah / Ayat / Juz)
+// ==========================================
+// Desain visualnya SAMA dengan combo box Halaman di atas (trigger mirip
+// <select> + panel berisi kotak di atas & daftar bisa discroll di
+// bawahnya), TAPI kotak di bagian atas panel ini HANYA berfungsi
+// sebagai filter pencarian dari opsi yang sudah ada -- BUKAN input
+// manual seperti punya Halaman. Nilai field hanya berubah kalau user
+// mengklik salah satu item di daftar (yang berarti harus salah satu
+// opsi yang memang tersedia, mis. salah satu dari 114 nama Surah).
+//
+// Field Surah/Ayat/Juz TETAP berupa <select id="..."> asli yang
+// disembunyikan (display:none) -- semua fungsi isiDropdownSurah()/
+// isiDropdownAyat()/isiDropdownJuz() dan listener 'change' yang sudah
+// ada (lihat perbaruiRantaiBacaan()) TIDAK berubah sama sekali, karena
+// <select> itu tetap jadi satu-satunya sumber nilai yang sebenarnya.
+// Combo box kustom ini hanya lapisan tampilan+interaksi di atasnya:
+// renderSearchableCombo() menyalin opsi dari <select> ke daftar
+// tampilan, dan memilih item di daftar akan set `sel.value` lalu
+// men-dispatch event 'change' pada <select> aslinya (supaya rantai
+// Surah->Ayat->Juz->Halaman tetap jalan seperti biasa).
+
+// Gambar ulang trigger + daftar combo box kustom (id `selectId` + Combo/
+// Trigger/TriggerText/List) berdasarkan opsi & nilai <select id="selectId">
+// SAAT INI. Dipanggil dari isiDropdownAyat()/isiDropdownJuz() setiap
+// kali opsinya dibangun ulang, dan juga dipanggil manual dari
+// nilai-tahfidz.html/nilai-tilawah.html setelah isiDropdownSurah() atau
+// setelah set `mulaiSurah`/`selesaiSurah`.value langsung (mode edit) --
+// lihat komentar di kedua file itu. Aman dipanggil meski combo box-nya
+// belum/tidak dipasang di halaman itu (langsung return).
+function renderSearchableCombo(selectId) {
+  const sel = document.getElementById(selectId);
+  const triggerText = document.getElementById(selectId + 'TriggerText');
+  const trigger = document.getElementById(selectId + 'Trigger');
+  const listEl = document.getElementById(selectId + 'List');
+  if (!sel || !listEl) return;
+
+  let itemsHtml = '';
+  Array.from(sel.options).forEach(opt => {
+    const aktif = opt.value === sel.value;
+    itemsHtml += `<div class="halaman-combo-item${aktif ? ' active' : ''}" data-nilai="${opt.value.replace(/"/g, '&quot;')}">${opt.textContent}</div>`;
+  });
+  listEl.innerHTML = itemsHtml;
+
+  if (triggerText) {
+    const opsiTerpilih = sel.options[sel.selectedIndex];
+    const kosong = sel.dataset.placeholderKosong || 'Pilih';
+    triggerText.textContent = (sel.value && opsiTerpilih) ? opsiTerpilih.textContent : kosong;
+  }
+  if (trigger) trigger.classList.toggle('disabled', !!sel.disabled);
+}
+
+// Saring daftar item combo box (`listEl`) supaya hanya menampilkan item
+// yang teksnya mengandung `q` (tidak peka huruf besar/kecil) -- dipakai
+// kotak pencarian combo box Surah/Ayat/Juz (BUKAN untuk Halaman, yang
+// punya perilaku input-manual sendiri di setupHalamanCombo()).
+function saringDaftarCombo_(listEl, q) {
+  q = q.trim().toLowerCase();
+  listEl.querySelectorAll('.halaman-combo-item').forEach(item => {
+    const teks = item.textContent.toLowerCase();
+    item.style.display = (!q || teks.includes(q)) ? '' : 'none';
+  });
+}
+
+// Pasang interaksi combo box kustom "cari dari opsi" untuk satu <select>
+// (id `selectId`, mis. 'mulaiSurah'/'mulaiAyat'/'mulaiJuz'). Dipanggil
+// sekali per field saat halaman dimuat (lihat nilai-tahfidz.html/
+// nilai-tilawah.html) -- struktur HTML yang dibutuhkan sama seperti
+// combo box Halaman, ditambah <select> asli yang disembunyikan:
+//   <div class="halaman-combo" id="{id}Combo">
+//     <div class="halaman-combo-trigger" id="{id}Trigger">
+//       <span id="{id}TriggerText">Pilih ...</span>
+//       <span class="halaman-combo-caret">&#9662;</span>
+//     </div>
+//     <div class="halaman-combo-panel" id="{id}Panel">
+//       <input type="text" id="{id}Search" class="halaman-combo-input" placeholder="Cari ...">
+//       <div class="halaman-combo-list" id="{id}List"></div>
+//     </div>
+//   </div>
+//   <select id="{id}" style="display:none;"></select>
+//
+// `placeholderKosong` (opsional): teks yang tampil di trigger saat
+// <select> belum ada nilainya, mis. "Pilih Surah".
+function setupSearchableCombo(selectId, placeholderKosong) {
+  const combo = document.getElementById(selectId + 'Combo');
+  const trigger = document.getElementById(selectId + 'Trigger');
+  const panel = document.getElementById(selectId + 'Panel');
+  const sel = document.getElementById(selectId);
+  const listEl = document.getElementById(selectId + 'List');
+  const searchInput = document.getElementById(selectId + 'Search');
+  if (!combo || !trigger || !panel || !sel || !listEl) return;
+
+  if (placeholderKosong) sel.dataset.placeholderKosong = placeholderKosong;
+
+  const bukaPanel = () => {
+    if (sel.disabled) return;
+    tutupSemuaHalamanCombo_();
+    combo.classList.add('open');
+    if (searchInput) {
+      searchInput.value = '';
+      saringDaftarCombo_(listEl, '');
+      searchInput.focus();
+    }
+  };
+  const tutupPanel = () => combo.classList.remove('open');
+
+  trigger.addEventListener('click', () => {
+    combo.classList.contains('open') ? tutupPanel() : bukaPanel();
+  });
+
+  if (searchInput) {
+    // Kotak ini HANYA menyaring daftar di bawahnya -- tidak pernah
+    // mengubah nilai <select> secara langsung (beda dengan combo box
+    // Halaman yang kotaknya bisa jadi input manual).
+    searchInput.addEventListener('input', () => saringDaftarCombo_(listEl, searchInput.value));
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') tutupPanel();
+    });
+  }
+
+  listEl.addEventListener('click', (e) => {
+    const item = e.target.closest('.halaman-combo-item');
+    if (!item) return;
+    if (sel.value !== item.dataset.nilai) {
+      sel.value = item.dataset.nilai;
+      sel.dispatchEvent(new Event('change'));
+    }
+    tutupPanel();
+  });
+
+  _halamanComboRegistry_.push(tutupPanel);
+  renderSearchableCombo(selectId);
 }
 
 const PREDIKAT_HALAQOH_LIST = ['A', 'B', 'C'];

@@ -899,6 +899,16 @@
       font-weight: 600;
     }
 
+    .halaman-combo-trigger.disabled {
+      cursor: not-allowed;
+      background: #eef1f5;
+      color: var(--text-muted);
+    }
+
+    .halaman-combo-trigger.disabled span:first-child {
+      color: var(--text-muted);
+    }
+
     .form-row {
       margin-bottom: 14px;
     }
@@ -1038,15 +1048,45 @@
           <div class="bacaan-grid">
             <div class="field-group">
               <label>Surah</label>
-              <select id="mulaiSurah"></select>
+              <div class="halaman-combo searchable-combo" id="mulaiSurahCombo">
+                <div class="halaman-combo-trigger" id="mulaiSurahTrigger" tabindex="0">
+                  <span id="mulaiSurahTriggerText">Pilih Surah</span>
+                  <span class="halaman-combo-caret">&#9662;</span>
+                </div>
+                <div class="halaman-combo-panel" id="mulaiSurahPanel">
+                  <input type="text" id="mulaiSurahSearch" class="halaman-combo-input" placeholder="Cari nama surah...">
+                  <div class="halaman-combo-list" id="mulaiSurahList"></div>
+                </div>
+              </div>
+              <select id="mulaiSurah" style="display:none;"></select>
             </div>
             <div class="field-group">
               <label>Ayat</label>
-              <select id="mulaiAyat"></select>
+              <div class="halaman-combo searchable-combo" id="mulaiAyatCombo">
+                <div class="halaman-combo-trigger" id="mulaiAyatTrigger" tabindex="0">
+                  <span id="mulaiAyatTriggerText">Pilih Ayat</span>
+                  <span class="halaman-combo-caret">&#9662;</span>
+                </div>
+                <div class="halaman-combo-panel" id="mulaiAyatPanel">
+                  <input type="text" id="mulaiAyatSearch" class="halaman-combo-input" placeholder="Cari nomor ayat...">
+                  <div class="halaman-combo-list" id="mulaiAyatList"></div>
+                </div>
+              </div>
+              <select id="mulaiAyat" style="display:none;"></select>
             </div>
             <div class="field-group">
               <label>Juz</label>
-              <select id="mulaiJuz"></select>
+              <div class="halaman-combo searchable-combo" id="mulaiJuzCombo">
+                <div class="halaman-combo-trigger" id="mulaiJuzTrigger" tabindex="0">
+                  <span id="mulaiJuzTriggerText">Pilih Juz</span>
+                  <span class="halaman-combo-caret">&#9662;</span>
+                </div>
+                <div class="halaman-combo-panel" id="mulaiJuzPanel">
+                  <input type="text" id="mulaiJuzSearch" class="halaman-combo-input" placeholder="Cari nomor juz...">
+                  <div class="halaman-combo-list" id="mulaiJuzList"></div>
+                </div>
+              </div>
+              <select id="mulaiJuz" style="display:none;"></select>
             </div>
             <div class="field-group">
               <label>Halaman</label>
@@ -1069,15 +1109,45 @@
           <div class="bacaan-grid">
             <div class="field-group">
               <label>Surah</label>
-              <select id="selesaiSurah"></select>
+              <div class="halaman-combo searchable-combo" id="selesaiSurahCombo">
+                <div class="halaman-combo-trigger" id="selesaiSurahTrigger" tabindex="0">
+                  <span id="selesaiSurahTriggerText">Pilih Surah</span>
+                  <span class="halaman-combo-caret">&#9662;</span>
+                </div>
+                <div class="halaman-combo-panel" id="selesaiSurahPanel">
+                  <input type="text" id="selesaiSurahSearch" class="halaman-combo-input" placeholder="Cari nama surah...">
+                  <div class="halaman-combo-list" id="selesaiSurahList"></div>
+                </div>
+              </div>
+              <select id="selesaiSurah" style="display:none;"></select>
             </div>
             <div class="field-group">
               <label>Ayat</label>
-              <select id="selesaiAyat"></select>
+              <div class="halaman-combo searchable-combo" id="selesaiAyatCombo">
+                <div class="halaman-combo-trigger" id="selesaiAyatTrigger" tabindex="0">
+                  <span id="selesaiAyatTriggerText">Pilih Ayat</span>
+                  <span class="halaman-combo-caret">&#9662;</span>
+                </div>
+                <div class="halaman-combo-panel" id="selesaiAyatPanel">
+                  <input type="text" id="selesaiAyatSearch" class="halaman-combo-input" placeholder="Cari nomor ayat...">
+                  <div class="halaman-combo-list" id="selesaiAyatList"></div>
+                </div>
+              </div>
+              <select id="selesaiAyat" style="display:none;"></select>
             </div>
             <div class="field-group">
               <label>Juz</label>
-              <select id="selesaiJuz"></select>
+              <div class="halaman-combo searchable-combo" id="selesaiJuzCombo">
+                <div class="halaman-combo-trigger" id="selesaiJuzTrigger" tabindex="0">
+                  <span id="selesaiJuzTriggerText">Pilih Juz</span>
+                  <span class="halaman-combo-caret">&#9662;</span>
+                </div>
+                <div class="halaman-combo-panel" id="selesaiJuzPanel">
+                  <input type="text" id="selesaiJuzSearch" class="halaman-combo-input" placeholder="Cari nomor juz...">
+                  <div class="halaman-combo-list" id="selesaiJuzList"></div>
+                </div>
+              </div>
+              <select id="selesaiJuz" style="display:none;"></select>
             </div>
             <div class="field-group">
               <label>Halaman</label>
@@ -1223,6 +1293,12 @@
       isiDropdownHalaman('selesaiJuz', 'selesaiHalaman');
       setupHalamanCombo('mulaiHalaman');
       setupHalamanCombo('selesaiHalaman');
+      setupSearchableCombo('mulaiSurah', 'Pilih Surah');
+      setupSearchableCombo('mulaiAyat', 'Pilih Ayat');
+      setupSearchableCombo('mulaiJuz', 'Pilih Juz');
+      setupSearchableCombo('selesaiSurah', 'Pilih Surah');
+      setupSearchableCombo('selesaiAyat', 'Pilih Ayat');
+      setupSearchableCombo('selesaiJuz', 'Pilih Juz');
       isiDropdownPredikatStatus();
 
       // Rantai Surah -> Ayat -> Juz -> Halaman dibangun ulang tiap kali
@@ -1249,6 +1325,8 @@
       const opsi = '<option value="">-</option>' + SURAH_LIST.map(s => `<option value="${s}">${s}</option>`).join('');
       document.getElementById('mulaiSurah').innerHTML = opsi;
       document.getElementById('selesaiSurah').innerHTML = opsi;
+      renderSearchableCombo('mulaiSurah');
+      renderSearchableCombo('selesaiSurah');
     }
 
     function isiDropdownPredikatStatus() {
@@ -1480,6 +1558,7 @@
       const selesai = uraiBacaan(isEdit ? entri.selesai : '');
 
       document.getElementById('mulaiSurah').value = mulai.surah || '';
+      renderSearchableCombo('mulaiSurah');
       // Bentuk ulang dropdown Ayat, Juz & Halaman berantai sesuai data
       // yang baru saja diisi, sambil mencoba mempertahankan nilai lama
       // masing-masing (kalau masih valid untuk rentang barunya).
@@ -1488,6 +1567,7 @@
       isiDropdownHalaman('mulaiJuz', 'mulaiHalaman', mulai.halaman || '');
 
       document.getElementById('selesaiSurah').value = selesai.surah || '';
+      renderSearchableCombo('selesaiSurah');
       isiDropdownAyat('selesaiSurah', 'selesaiAyat', selesai.ayat || '');
       isiDropdownJuz('selesaiSurah', 'selesaiAyat', 'selesaiJuz', selesai.juz || '');
       isiDropdownHalaman('selesaiJuz', 'selesaiHalaman', selesai.halaman || '');
