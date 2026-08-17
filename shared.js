@@ -225,10 +225,14 @@ function setupHalamanCombo(halamanInputId) {
   const listEl = document.getElementById(halamanInputId + 'List');
   if (!combo || !trigger || !panel || !input || !listEl) return;
 
+  // Catatan: bukaPanel() SENGAJA tidak memanggil input.focus() -- kalau
+  // dipanggil otomatis begitu trigger diklik, keyboard di HP/tablet akan
+  // langsung muncul walau guru belum niat mengetik. Fokus/keyboard baru
+  // muncul kalau guru sendiri yang mengklik kotak pencarian di dalam
+  // panel (perilaku fokus bawaan browser, tidak perlu dipanggil manual).
   const bukaPanel = () => {
     tutupSemuaHalamanCombo_();
     combo.classList.add('open');
-    input.focus();
   };
   const tutupPanel = () => combo.classList.remove('open');
 
@@ -480,6 +484,10 @@ function setupSearchableCombo(selectId, placeholderKosong) {
 
   if (placeholderKosong) sel.dataset.placeholderKosong = placeholderKosong;
 
+  // Catatan: bukaPanel() SENGAJA tidak memanggil searchInput.focus() --
+  // supaya keyboard di HP/tablet tidak langsung muncul saat trigger
+  // diklik. Fokus/keyboard baru muncul kalau guru sendiri mengklik
+  // kotak pencarian di dalam panel (perilaku fokus bawaan browser).
   const bukaPanel = () => {
     if (sel.disabled) return;
     tutupSemuaHalamanCombo_();
@@ -487,7 +495,6 @@ function setupSearchableCombo(selectId, placeholderKosong) {
     if (searchInput) {
       searchInput.value = '';
       saringDaftarCombo_(listEl, '');
-      searchInput.focus();
     }
   };
   const tutupPanel = () => combo.classList.remove('open');
@@ -513,6 +520,15 @@ function setupSearchableCombo(selectId, placeholderKosong) {
       sel.value = item.dataset.nilai;
       sel.dispatchEvent(new Event('change'));
     }
+    // Render ulang trigger+daftar combo box INI SENDIRI segera setelah
+    // memilih -- jangan cuma mengandalkan rantai perbaruiRantaiBacaan()
+    // (yang dipicu event 'change' di atas), karena rantai itu hanya
+    // merender ulang combo box Ayat/Juz/Halaman di bawahnya, BUKAN
+    // combo box Surah itu sendiri (opsi Surah tidak pernah dibangun
+    // ulang setelah initial load -- lihat isiDropdownSurah()). Tanpa
+    // baris ini, trigger combo box Surah akan tetap menampilkan "Pilih
+    // Surah" walau nilainya sebenarnya sudah tersimpan.
+    renderSearchableCombo(selectId);
     tutupPanel();
   });
 
