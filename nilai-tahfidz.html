@@ -1165,7 +1165,8 @@
         showLoading(true, 'Mengambil riwayat nilai dari server...');
         const resNilai = await apiCall('getRekapNilaiHalaqoh', {
           username: user.username,
-          halaqoh: currentHalaqohInfo.halaqoh
+          halaqoh: currentHalaqohInfo.halaqoh,
+          kegiatan: KEGIATAN_HALAMAN
         });
         showLoading(false);
 
@@ -1672,7 +1673,7 @@
 
         // 3. Ambil data terbaru dari server (milik sendiri + musrif lain).
         showLoading(true, 'Mengambil data terbaru dari server...');
-        const pull = await apiCall('getRekapNilaiHalaqoh', { username: user.username, halaqoh });
+        const pull = await apiCall('getRekapNilaiHalaqoh', { username: user.username, halaqoh, kegiatan: KEGIATAN_HALAMAN });
         showLoading(false);
 
         if (!pull.success) {
