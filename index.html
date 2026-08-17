@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Aplikasi Penilaian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       SHARED (sebelumnya shared.css - kini digabung ke file ini)
+       ============================================================ */
+    /* ==========================================================
+       SHARED.CSS
+       Dipakai bersama oleh index.html, dashboard.html, rekap.html,
+       dan aspek.html. Berisi variabel warna, reset dasar, header
+       aplikasi, tombol umum, tabel, modal dasar (alert/konfirmasi),
+       dan loading overlay.
+       ========================================================== */
+
+    :root {
+      --primary: #1a7a5e;
+      --primary-dark: #145f49;
+      --bg-color: #05822d;
+      --card-bg: #ffffff;
+      --text-main: #1a3c34;
+      --text-muted: #666666;
+      --border-color: #e2e8f0;
+      --error: #e53e3e;
+      --success: #38a169;
+      --online-color: #2b6cb0;
+      --offline-color: #ed8936;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: transparent;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ============================
+       HEADER CARD
+       ============================ */
+    .app-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      margin: 5px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border-color: #016922;
+    }
+
+    .app-header img {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .app-header .app-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .app-header .app-subtitle {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .app-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      padding: 5px 5px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ============================
+       TOMBOL UMUM
+       ============================ */
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      background: #086102;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-main:active {
+      background: #075ac7;
+    }
+
+    .btn-main:disabled {
+      background: #d86309;
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* ============================
+       TOP NAV (dipakai rekap.html & aspek.html)
+       ============================ */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-back {
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .btn-back:active {
+      background: #cbd5e0;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============================
+       TABEL (dipakai rekap.html & aspek.html)
+       ============================ */
+    .table-responsive {
+      overflow-x: auto;
+      overflow-y: auto;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    td.text-left {
+      text-align: left;
+    }
+
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 1;
+      border-right: 1px solid var(--border-color);
+      min-width: 150px;
+    }
+
+    th.sticky-col {
+      background: #f8fafc;
+      z-index: 3;
+    }
+
+    /* ============================
+       STATUS WARNA NILAI
+       ============================ */
+    .value-online {
+      color: var(--online-color);
+      font-weight: 700;
+    }
+
+    .value-offline {
+      color: var(--offline-color);
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .value-online::before {
+      content: "✓ ";
+      font-size: 11px;
+    }
+
+    .value-offline::before {
+      content: "⟳ ";
+      font-size: 11px;
+    }
+
+    .value-cell {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .value-cell.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      min-height: 18px;
+    }
+
+    /* ============================
+       LOADING OVERLAY
+       ============================ */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ============================
+       MODAL DASAR (Alert & Konfirmasi)
+       Dipakai di dashboard.html & aspek.html.
+       Modal lain yang lebih spesifik (pilihan hapus/edit/kolom)
+       didefinisikan langsung di aspek.html.
+       ============================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 82vh;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: #edf2f7;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      padding: 8px 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .modal-footer .btn-secondary {
+      flex: 1;
+      background: #edf2f7;
+      color: var(--text-main);
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-footer .btn-main {
+      flex: 2;
+    }
+
+    .modal-footer.stack {
+      flex-direction: column;
+    }
+
+    .modal-footer.stack .btn-secondary,
+    .modal-footer.stack .btn-main,
+    .modal-footer.stack .btn-danger {
+      flex: none;
+      width: 100%;
+    }
+
+
+    /* ============================
+       STYLE KHUSUS HALAMAN INI
+       ============================ */
+    /* ============================
+       SPLASH SCREEN (khusus index.html)
+       ============================ */
+    #splashScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    #splashScreen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Konten di balik splash (header + form login) disembunyikan dulu
+       supaya tidak tembus terlihat lewat splash yang transparan, lalu
+       dimunculkan setelah splash benar-benar hilang dari DOM. */
+    .app-body {
+      opacity: 0;
+    }
+
+    .app-body.ready {
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .splash-shape {
+      display: none;
+    }
+
+    .splash-title {
+      position: relative;
+      z-index: 1;
+      margin-top: 90px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+      text-align: center;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+
+    .splash-logo-wrap {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .splash-logo-wrap img {
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+    }
+
+    .splash-footer {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 110px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .splash-footer .splash-lembaga {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .splash-footer .splash-periode {
+      font-size: 13px;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .splash-loading-bar {
+      position: relative;
+      z-index: 1;
+      margin-top: 16px;
+      width: 90px;
+      height: 3px;
+      border-radius: 3px;
+      background: var(--border-color);
+      overflow: hidden;
+    }
+
+    .splash-loading-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      width: 90px;
+      background: var(--primary);
+      border-radius: 3px;
+      animation: splashLoading 1.1s ease-in-out infinite;
+    }
+
+    @keyframes splashLoading {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(250%);
+      }
+    }
+
+    .splash-loading-bar.hidden {
+      display: none;
+    }
+
+    /* ============================
+       LOGIN FORM (khusus index.html)
+       ============================ */
+    .login-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .login-card h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .password-wrapper {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .password-wrapper .input-field {
+      margin-bottom: 0;
+      padding-right: 44px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0;
+    }
+
+    .toggle-password:active {
+      color: var(--primary);
+    }
+
+    .toggle-password svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .login-msg {
+      text-align: center;
+      font-size: 13px;
+      color: var(--error);
+      margin-bottom: 12px;
+      min-height: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SPLASH SCREEN -->
+  <div id="splashScreen">
+    <div class="splash-shape top"></div>
+    <div class="splash-title" id="splashTitle">Memuat...</div>
+    <div class="splash-logo-wrap">
+      <img id="splashLogo" src="" alt="logo" onerror="this.style.visibility='hidden'">
+    </div>
+    <div class="splash-footer">
+      <div class="splash-lembaga" id="splashLembaga"></div>
+      <div class="splash-periode" id="splashPeriode">&nbsp;</div>
+      <div class="splash-loading-bar"></div>
+    </div>
+    <div class="splash-shape bottom"></div>
+  </div>
+
+  <!-- HEADER CARD (tersembunyi di halaman login, muncul di halaman lain) -->
+  <div class="app-header" id="appHeader" style="display:none;">
+    <img id="appLogo" src="" alt="logo" onerror="this.style.visibility='hidden'">
+    <div>
+      <div class="app-title" id="appNamaLembaga">Memuat...</div>
+      <div class="app-subtitle" id="appPeriode"></div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading" class="loading-overlay" style="display:none;">
+    <div style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div id="loadingText" style="margin-top: 16px; font-weight: 600; color: var(--text-main);">Memuat...</div>
+  </div>
+
+  <div class="app-body">
+    <div class="login-wrapper">
+      <div class="login-card">
+        <h2>Login Guru</h2>
+        <div id="loginMsg" class="login-msg"></div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <input type="text" id="username" class="input-field" placeholder="Username" required>
+          <div class="password-wrapper">
+            <input type="password" id="password" class="input-field" placeholder="Password" required>
+            <button type="button" class="toggle-password" id="togglePassword" onclick="togglePasswordVisibility()" aria-label="Tampilkan/sembunyikan password">
+              <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <button type="submit" id="btnLogin" class="btn-main">Masuk</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    // ==========================================
+    // SPLASH SCREEN
+    // ==========================================
+    const SPLASH_HOLD_AFTER_DATA = 5000;
+    let pendingHeaderReveal = null;
+
+    function hideSplashScreen() {
+      setTimeout(async () => {
+        // Tunggu keputusan resolveInitialPage() selesai (bisa perlu waktu
+        // karena ada pemanggilan TinyDB & verifikasi login ke server).
+        // Kalau ujungnya redirect ke dashboard.html, splash dibiarkan
+        // tetap menutupi layar sampai halaman benar-benar berpindah --
+        // form login tidak pernah sempat ditampilkan sama sekali.
+        const willNavigateAway = await resolveInitialPage();
+        if (willNavigateAway) return;
+
+        const splash = document.getElementById('splashScreen');
+        splash.classList.add('fade-out');
+        setTimeout(() => {
+          splash.remove();
+          if (pendingHeaderReveal) pendingHeaderReveal();
+          document.querySelector('.app-body').classList.add('ready');
+        }, 550);
+      }, SPLASH_HOLD_AFTER_DATA);
+    }
+
+    // ==========================================
+    // HEADER: INFO LEMBAGA (versi lengkap dengan splash)
+    // ==========================================
+    async function loadInfoLembaga() {
+      let res = await apiCall('getInfoLembaga');
+      const headerEl = document.getElementById('appHeader');
+      const loadingBar = document.querySelector('.splash-loading-bar');
+
+      if (res && res.success) {
+        // Simpan ke TinyDB agar bisa dipakai lagi saat offline & oleh
+        // halaman lain (dashboard/rekap/aspek) via loadAppHeaderFromCache().
+        try {
+          await kStorage.setJSON(infoLembagaTag(), res);
+        } catch (e) {
+          console.log('Tidak bisa menyimpan info lembaga ke TinyDB:', e);
+        }
+      } else {
+        // Offline / gagal fetch -> coba pakai cache TinyDB
+        try {
+          const cached = await kStorage.getJSON(infoLembagaTag(), null);
+          if (cached && cached.success) {
+            res = cached;
+          }
+        } catch (e) {
+          console.log('Tidak bisa membaca cache info lembaga dari TinyDB:', e);
+        }
+      }
+
+      if (!res || !res.success) {
+        document.getElementById('splashTitle').textContent = '';
+        pendingHeaderReveal = () => { headerEl.style.display = 'none'; };
+        if (loadingBar) loadingBar.classList.add('hidden');
+        hideSplashScreen();
+        return;
+      }
+
+      document.getElementById('appNamaLembaga').textContent = res.namaLembaga || '';
+      const periodeText = [res.tahunAjaran, res.semester].filter(Boolean).join(' ');
+      document.getElementById('appPeriode').textContent = periodeText;
+
+      const logoEl = document.getElementById('appLogo');
+      if (res.logoUrl) {
+        logoEl.src = res.logoUrl;
+        logoEl.style.visibility = 'visible';
+      } else {
+        logoEl.style.visibility = 'hidden';
+      }
+
+      document.getElementById('splashTitle').textContent = res.appNama || '';
+      document.getElementById('splashLembaga').textContent = res.namaLembaga || "";
+      document.getElementById('splashPeriode').innerHTML =
+        `Tahun Ajaran ${res.tahunAjaran || ''}<br>Semester ${res.semester || ''}`;
+
+      const splashLogoEl = document.getElementById('splashLogo');
+      if (res.logoUrl) {
+        splashLogoEl.src = res.logoUrl;
+        splashLogoEl.style.visibility = 'visible';
+      } else {
+        splashLogoEl.style.visibility = 'hidden';
+      }
+
+      if (loadingBar) loadingBar.classList.add('hidden');
+
+      if (res.appNama) document.title = res.appNama;
+
+      pendingHeaderReveal = () => { headerEl.style.display = 'flex'; };
+
+      hideSplashScreen();
+    }
+
+    // ==========================================
+    // TOGGLE PASSWORD
+    // ==========================================
+    function togglePasswordVisibility() {
+      const pwInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
+      const isHidden = pwInput.type === 'password';
+
+      pwInput.type = isHidden ? 'text' : 'password';
+
+      eyeIcon.innerHTML = isHidden ?
+        `<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.86 21.86 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>` :
+        `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle>`;
+    }
+
+    // ==========================================
+    // AUTHENTICATION
+    // ==========================================
+    // Dipanggil setelah splash selesai menampilkan info lembaga. Jika sudah
+    // ada sesi tersimpan (TinyDB atau sessionStorage), langsung lanjut ke
+    // dashboard.html tanpa menampilkan form login.
+    async function resolveInitialPage() {
+      // Return true jika fungsi ini akan membawa guru pindah dari halaman
+      // ini (redirect ke dashboard.html, atau proses login via URL
+      // params), false jika form login memang harus ditampilkan.
+      // Cek login tersimpan di TinyDB
+      try {
+        const savedSession = await kStorage.getJSON(userSessionTag(), null);
+        if (savedSession && savedSession.username && savedSession.password) {
+          // Coba login otomatis (verifikasi ke server)
+          const loginRes = await apiCall('login', { username: savedSession.username, password: savedSession.password });
+          if (loginRes.success) {
+            user = loginRes;
+            sessionStorage.setItem('user', JSON.stringify(user));
+            window.location.href = 'dashboard.html';
+            return true;
+          }
+          if (loginRes.offline) {
+            // Gagal karena tidak ada koneksi (bukan kredensial salah) ->
+            // percaya pada sesi lokal yang sudah pernah login sebelumnya.
+            user = { username: savedSession.username, nama: savedSession.nama || savedSession.username, role: savedSession.role };
+            sessionStorage.setItem('user', JSON.stringify(user));
+            window.location.href = 'dashboard.html';
+            return true;
+          }
+          // Jika sampai sini: server terjangkau tapi kredensial ditolak ->
+          // lanjut ke fallback di bawah (biasanya akan berakhir di form login).
+        }
+      } catch (e) {
+        console.log('Tidak bisa membaca session dari TinyDB:', e);
+      }
+
+      // Fallback ke URL params atau sessionStorage
+      const params = new URLSearchParams(window.location.search);
+      const u = params.get('username');
+      const p = params.get('password');
+
+      if (u && p) {
+        // doLogin() sendiri yang akan redirect saat berhasil, atau
+        // menampilkan pesan error di form saat gagal -- form login perlu
+        // ditampilkan setelah ini selesai baik berhasil maupun gagal.
+        await doLogin(u, p);
+        return false;
+      }
+
+      const savedUser = sessionStorage.getItem('user');
+      if (savedUser) {
+        user = JSON.parse(savedUser);
+        window.location.href = 'dashboard.html';
+        return true;
+      }
+
+      // Tidak ada sesi sama sekali -> form login memang harus ditampilkan.
+      return false;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadInfoLembaga();
+    });
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      await doLogin(u, p);
+    }
+
+    async function doLogin(u, p) {
+      const btn = document.getElementById('btnLogin');
+      const msg = document.getElementById('loginMsg');
+      if (btn) btn.disabled = true;
+      msg.textContent = '';
+      showLoading(true, 'Autentikasi...');
+
+      const res = await apiCall('login', { username: u, password: p });
+
+      if (btn) btn.disabled = false;
+      showLoading(false);
+
+      if (res.success) {
+        user = res;
+        sessionStorage.setItem('user', JSON.stringify(user));
+
+        // Simpan session ke TinyDB untuk auto-login
+        try {
+          await kStorage.setJSON(userSessionTag(), { username: u, password: p, nama: res.nama, role: res.role, loginAt: new Date().toISOString() });
+        } catch (e) {
+          console.log('Tidak bisa menyimpan session ke TinyDB:', e);
+        }
+
+        if (window.AppInventor) {
+          window.AppInventor.setWebViewString(JSON.stringify({
+            status: "login_success",
+            username: u,
+            password: p
+          }));
+        }
+
+        // Sinkron Data Guru otomatis — HANYA dijalankan pada alur login manual ini
+        // (bukan pada auto-login via session tersimpan di resolveInitialPage()).
+        // GAS masih "panas" dari request login sehingga request berikutnya lebih cepat.
+        showLoading(true, 'Menyinkronkan data guru...');
+        try {
+          // sinkronData() dari shared.js aman dipanggil di sini walau halaman
+          // ini tidak punya elemen #syncStatus/#btnSinkron -- keduanya sudah
+          // dijaga dengan pengecekan null di dalam fungsi tsb.
+          await sinkronData(true);
+        } catch (e) {
+          console.log('Auto-sinkron gagal:', e);
+        }
+
+        window.location.href = 'dashboard.html';
+      } else {
+        msg.textContent = res.message;
+      }
+    }
+  </script>
+</body>
+
+</html>

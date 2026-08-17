@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dashboard - Aplikasi Penilaian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       SHARED (sebelumnya shared.css - kini digabung ke file ini)
+       ============================================================ */
+    /* ==========================================================
+       SHARED.CSS
+       Dipakai bersama oleh index.html, dashboard.html, rekap.html,
+       dan aspek.html. Berisi variabel warna, reset dasar, header
+       aplikasi, tombol umum, tabel, modal dasar (alert/konfirmasi),
+       dan loading overlay.
+       ========================================================== */
+
+    :root {
+      --primary: #1a7a5e;
+      --primary-dark: #145f49;
+      --bg-color: #05822d;
+      --card-bg: #ffffff;
+      --text-main: #1a3c34;
+      --text-muted: #666666;
+      --border-color: #e2e8f0;
+      --error: #e53e3e;
+      --success: #38a169;
+      --online-color: #2b6cb0;
+      --offline-color: #ed8936;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: transparent;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ============================
+       HEADER CARD
+       ============================ */
+    .app-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      margin: 5px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border-color: #016922;
+    }
+
+    .app-header img {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .app-header .app-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .app-header .app-subtitle {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .app-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      padding: 5px 5px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ============================
+       TOMBOL UMUM
+       ============================ */
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      background: #086102;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-main:active {
+      background: #075ac7;
+    }
+
+    .btn-main:disabled {
+      background: #d86309;
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* ============================
+       TOP NAV (dipakai rekap.html & aspek.html)
+       ============================ */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-back {
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .btn-back:active {
+      background: #cbd5e0;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============================
+       TABEL (dipakai rekap.html & aspek.html)
+       ============================ */
+    .table-responsive {
+      overflow-x: auto;
+      overflow-y: auto;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    td.text-left {
+      text-align: left;
+    }
+
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 1;
+      border-right: 1px solid var(--border-color);
+      min-width: 150px;
+    }
+
+    th.sticky-col {
+      background: #f8fafc;
+      z-index: 3;
+    }
+
+    /* ============================
+       STATUS WARNA NILAI
+       ============================ */
+    .value-online {
+      color: var(--online-color);
+      font-weight: 700;
+    }
+
+    .value-offline {
+      color: var(--offline-color);
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .value-online::before {
+      content: "✓ ";
+      font-size: 11px;
+    }
+
+    .value-offline::before {
+      content: "⟳ ";
+      font-size: 11px;
+    }
+
+    .value-cell {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .value-cell.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      min-height: 18px;
+    }
+
+    /* ============================
+       LOADING OVERLAY
+       ============================ */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ============================
+       MODAL DASAR (Alert & Konfirmasi)
+       Dipakai di dashboard.html & aspek.html.
+       Modal lain yang lebih spesifik (pilihan hapus/edit/kolom)
+       didefinisikan langsung di aspek.html.
+       ============================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 82vh;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: #edf2f7;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      padding: 8px 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .modal-footer .btn-secondary {
+      flex: 1;
+      background: #edf2f7;
+      color: var(--text-main);
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-footer .btn-main {
+      flex: 2;
+    }
+
+    .modal-footer.stack {
+      flex-direction: column;
+    }
+
+    .modal-footer.stack .btn-secondary,
+    .modal-footer.stack .btn-main,
+    .modal-footer.stack .btn-danger {
+      flex: none;
+      width: 100%;
+    }
+
+
+    /* ============================
+       STYLE KHUSUS HALAMAN INI
+       ============================ */
+    /* ============================
+       DASHBOARD (khusus dashboard.html)
+       ============================ */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .header-bar h2 {
+      font-size: 18px;
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef2f2;
+      color: var(--error);
+      border: 1px solid #fecaca;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: 0.15s ease;
+    }
+
+    .btn-logout svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .btn-logout:active {
+      background: #fee2e2;
+      border-color: var(--error);
+      transform: scale(0.96);
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 5px;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-card:active {
+      background: #f8fafc;
+    }
+
+    .item-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .item-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ============================
+       KARTU WALI KELAS
+       ============================ */
+    .walikelas-section {
+      flex-shrink: 0;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .walikelas-section.show {
+      display: block;
+    }
+
+    .walikelas-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 8px;
+    }
+
+    .walikelas-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, #b7791f 0%, #975a16 100%);
+      border-radius: 12px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(151, 90, 22, 0.25);
+      margin-bottom: 5px;
+    }
+
+    .walikelas-card:active {
+      transform: scale(0.98);
+    }
+
+    .walikelas-icon {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .walikelas-title {
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .walikelas-subtitle {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 12px;
+    }
+
+    .walikelas-arrow {
+      color: #fff;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* ============================
+       KARTU HALAQOH (Musrif)
+       ============================ */
+    .halaqoh-section {
+      flex-shrink: 0;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .halaqoh-section.show {
+      display: block;
+    }
+
+    .halaqoh-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 8px;
+    }
+
+    .halaqoh-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, #1a7a5e 0%, #145f49 100%);
+      border-radius: 12px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(20, 95, 73, 0.25);
+      margin-bottom: 5px;
+    }
+
+    .halaqoh-card:active {
+      transform: scale(0.98);
+    }
+
+    .halaqoh-icon {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .halaqoh-title {
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .halaqoh-subtitle {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 12px;
+    }
+
+    .halaqoh-arrow {
+      color: #fff;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER CARD -->
+  <div class="app-header" id="appHeader" style="display:none;">
+    <img id="appLogo" src="" alt="logo" onerror="this.style.visibility='hidden'">
+    <div>
+      <div class="app-title" id="appNamaLembaga">Memuat...</div>
+      <div class="app-subtitle" id="appPeriode"></div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading" class="loading-overlay" style="display:none;">
+    <div
+      style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;">
+    </div>
+    <div id="loadingText" style="margin-top: 16px; font-weight: 600; color: var(--text-main);">Memuat...</div>
+  </div>
+
+  <div class="app-body">
+    <div class="container">
+      <div class="header-bar">
+        <div>
+          <h2>Assalamualaikum</h2>
+          <div style="font-size: 13px; color: var(--text-muted);" id="userGreeting">Guru</div>
+        </div>
+        <button class="btn-logout" onclick="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Keluar
+        </button>
+      </div>
+
+      <div
+        style="display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 12px; margin-bottom:12px; flex-shrink:0;">
+        <div id="syncStatus" style="font-size:12px; color: var(--text-muted);">Belum pernah sinkron</div>
+        <button id="btnSinkron" onclick="handleSinkronClick()"
+          style="background: var(--primary); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">
+          ⟳ Sinkron Data Guru
+        </button>
+      </div>
+      <div class="halaqoh-section" id="halaqohSection">
+        <div id="halaqohList"></div>
+      </div>
+
+      <div class="walikelas-section" id="waliKelasSection">
+        <div id="waliKelasList"></div>
+      </div>
+
+
+      <div class="card-list" id="classList">
+        <!-- Injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIRMASI CUSTOM (ganti confirm()) -->
+  <div id="modalKonfirmasi" class="modal-overlay" style="z-index:1000;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalKonfirmasiTitle">Konfirmasi</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalKonfirmasiMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;">
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="modalKonfirmasiResolve_(false)">Batal</button>
+        <button class="btn-main" onclick="modalKonfirmasiResolve_(true)">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ALERT CUSTOM (ganti alert()) -->
+  <div id="modalAlert" class="modal-overlay" style="z-index:1001;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalAlertTitle">Informasi</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalAlertMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-main" onclick="modalAlertResolve_()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    // ==========================================
+    // INISIALISASI HALAMAN
+    // ==========================================
+    let assignments = [];
+
+    // ==========================================
+    // DEBUG SEMENTARA -- menampilkan isi MENTAH cache TinyDB yang
+    // dipakai card Wali Kelas & Musrif, langsung di layar. Tujuannya
+    // supaya screenshot biasa dari pengguna sudah cukup jadi bukti,
+    // tanpa perlu langkah tambahan (buka console, fetch manual, dst).
+    // Hapus blok ini (dan elemen #debugCache di HTML) setelah masalah
+    // wali kelas selesai.
+    // ==========================================
+    async function renderDebugCache() {
+      const el = document.getElementById('debugCache');
+      if (!el) return;
+      try {
+        const wk = await kStorage.getJSON(waliKelasInfoTag(), '(kosong/null)');
+        const hal = await kStorage.getJSON(halaqohAssignmentsTag(), '(kosong/null)');
+        const meta = await kStorage.getJSON('SYNC_META', '(kosong/null)');
+        el.textContent =
+          'DEBUG SYNC_META: ' + JSON.stringify(meta) + '\n' +
+          'DEBUG WALIKELAS_INFO: ' + JSON.stringify(wk) + '\n' +
+          'DEBUG HALAQOH_ASSIGNMENTS: ' + JSON.stringify(hal);
+      } catch (e) {
+        el.textContent = 'DEBUG ERROR: ' + e.message;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const ok = await ensureLoggedIn();
+      if (!ok) return; // sudah diarahkan ke index.html oleh ensureLoggedIn()
+
+      loadAppHeaderFromCache();
+      loadDashboard();
+      loadWaliKelasSection();
+      loadHalaqohSection();
+      //renderDebugCache();
+    });
+
+    // ==========================================
+    // DASHBOARD
+    // ==========================================
+    async function loadDashboard() {
+      document.getElementById('userGreeting').textContent = user.nama;
+
+      showLoading(true, 'Memuat daftar kelas...');
+      let res = await apiCall('getGuruAssignments', { username: user.username });
+
+      if (!res.success) {
+        try {
+          const cached = await kStorage.getJSON('ASSIGNMENTS', null);
+          if (cached && cached.length) {
+            res = { success: true, data: cached };
+          }
+        } catch (e) { }
+      }
+
+      showLoading(false);
+
+      if (!res.success) {
+        await showAlert(res.message);
+        refreshSyncStatus();
+        return;
+      }
+
+      assignments = res.data;
+      const listEl = document.getElementById('classList');
+      listEl.innerHTML = '';
+
+      assignments.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <div>
+            <div class="item-title">${a.mapel}</div>
+            <div class="item-subtitle">Kelas ${a.kelas}</div>
+          </div>
+          <div style="color: var(--primary); font-weight: bold;">&rarr;</div>
+        `;
+        card.onclick = () => bukaRekap(a.kelas, a.mapel);
+        listEl.appendChild(card);
+      });
+
+      refreshSyncStatus();
+    }
+
+    // Menyimpan kelas/mapel yang dipilih ke sessionStorage, lalu pindah ke
+    // rekap.html (navigasi halaman sungguhan, bukan SPA).
+    function bukaRekap(kelas, mapel) {
+      setCurrentClass(kelas, mapel);
+      window.location.href = 'rekap.html';
+    }
+
+    // ==========================================
+    // WALI KELAS
+    // ==========================================
+    // Menampilkan kartu "Wali Kelas" HANYA jika guru yang login tercatat
+    // sebagai wali kelas (sheet KELAS&HALAQOH blok 1, kolom WALI KELAS).
+    // Datanya diambil dari cache TinyDB yang diisi oleh sinkronData() di
+    // shared.js -- SATU aksi "Sinkron Data Guru" mengambil assignments,
+    // data siswa, DAN info wali kelas sekaligus (lihat getSyncData di
+    // Code.gs). Halaman ini tidak melakukan pemanggilan online terpisah
+    // untuk info wali kelas.
+    async function loadWaliKelasSection() {
+      let res = null;
+      try {
+        res = await kStorage.getJSON(waliKelasInfoTag(), null);
+      } catch (e) { }
+
+      const section = document.getElementById('waliKelasSection');
+      const listEl = document.getElementById('waliKelasList');
+      if (!res || !res.success || !res.isWaliKelas || !res.kelasList || !res.kelasList.length) {
+        section.classList.remove('show');
+        return;
+      }
+
+      listEl.innerHTML = '';
+      res.kelasList.forEach(k => {
+        const card = document.createElement('div');
+        card.className = 'walikelas-card';
+        card.innerHTML = `
+          <div class="walikelas-icon">🎓</div>
+          <div style="flex:1;">
+            <div class="walikelas-title">Wali Kelas ${k.kelas}</div>
+            <div class="walikelas-subtitle">Lihat rekap nilai kelas</div>
+          </div>
+          <div class="walikelas-arrow">&rarr;</div>
+        `;
+        card.onclick = () => bukaWaliKelas(k.kelas);
+        listEl.appendChild(card);
+      });
+      section.classList.add('show');
+    }
+
+    // Dipanggil dari tombol "⟳ Sinkron Data Guru" -- setelah sinkron
+    // (assignments + siswa + info wali kelas + data Halaqoh) selesai,
+    // render ulang kartu Wali Kelas & Halaqoh supaya langsung
+    // mencerminkan hasil terbaru tanpa perlu reload halaman.
+    async function handleSinkronClick() {
+      await sinkronData(false, async () => {
+        loadDashboard();
+        loadWaliKelasSection();
+        loadHalaqohSection();
+        //renderDebugCache();
+      });
+    }
+
+    function bukaWaliKelas(kelas) {
+      setCurrentWaliKelas(kelas);
+      window.location.href = 'walikelas.html';
+    }
+
+    // ==========================================
+    // HALAQOH (Musrif)
+    // ==========================================
+    // Dibaca dari cache TinyDB (diisi oleh sinkronData() -- SATU aksi
+    // "Sinkron Data Guru" mengambil assignments mapel, data siswa, info
+    // wali kelas, DAN data Halaqoh sekaligus, lihat sinkronData() di
+    // shared.js). Halaman ini tidak melakukan pemanggilan online
+    // terpisah untuk data Halaqoh, sama seperti kartu kelas/mapel biasa.
+    // Kartu hanya ditampilkan kalau guru yang login memang tercatat
+    // sebagai MUSRIF di blok 2 sheet KELAS&HALAQOH.
+    async function loadHalaqohSection() {
+      const section = document.getElementById('halaqohSection');
+      const listEl = document.getElementById('halaqohList');
+
+      let assignments = [];
+      try {
+        assignments = await kStorage.getJSON(halaqohAssignmentsTag(), []);
+      } catch (e) { }
+
+      if (!assignments || !assignments.length) {
+        section.classList.remove('show');
+        return;
+      }
+
+      const LABEL_KEGIATAN = { TAHFIDZ: 'Tahfidz', TILAWAH: 'Tilawah' };
+
+      listEl.innerHTML = '';
+      assignments.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'halaqoh-card';
+        card.innerHTML = `
+          <div class="halaqoh-icon">📖</div>
+          <div style="flex:1;">
+            <div class="halaqoh-title">${a.halaqoh}</div>
+            <div class="halaqoh-subtitle">Nilai ${LABEL_KEGIATAN[a.kegiatan] || a.kegiatan}</div>
+          </div>
+          <div class="halaqoh-arrow">&rarr;</div>
+        `;
+        card.onclick = () => bukaHalaqoh(a.halaqoh, a.kegiatan);
+        listEl.appendChild(card);
+      });
+      section.classList.add('show');
+    }
+
+    function bukaHalaqoh(halaqoh, kegiatan) {
+      setCurrentHalaqoh(halaqoh, kegiatan);
+      window.location.href = kegiatan === 'TILAWAH' ? 'nilai-tilawah.html' : 'nilai-tahfidz.html';
+    }
+  </script>
+</body>
+
+</html>

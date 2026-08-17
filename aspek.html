@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Input Nilai - Aplikasi Penilaian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       SHARED (sebelumnya shared.css - kini digabung ke file ini)
+       ============================================================ */
+    /* ==========================================================
+       SHARED.CSS
+       Dipakai bersama oleh index.html, dashboard.html, rekap.html,
+       dan aspek.html. Berisi variabel warna, reset dasar, header
+       aplikasi, tombol umum, tabel, modal dasar (alert/konfirmasi),
+       dan loading overlay.
+       ========================================================== */
+
+    :root {
+      --primary: #1a7a5e;
+      --primary-dark: #145f49;
+      --bg-color: #05822d;
+      --card-bg: #ffffff;
+      --text-main: #1a3c34;
+      --text-muted: #666666;
+      --border-color: #e2e8f0;
+      --error: #e53e3e;
+      --success: #38a169;
+      --online-color: #2b6cb0;
+      --offline-color: #ed8936;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: transparent;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ============================
+       HEADER CARD
+       ============================ */
+    .app-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      margin: 5px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border-color: #016922;
+    }
+
+    .app-header img {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .app-header .app-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .app-header .app-subtitle {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .app-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      padding: 5px 5px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ============================
+       TOMBOL UMUM
+       ============================ */
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      background: #086102;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-main:active {
+      background: #075ac7;
+    }
+
+    .btn-main:disabled {
+      background: #d86309;
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* ============================
+       TOP NAV (dipakai rekap.html & aspek.html)
+       ============================ */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-back {
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .btn-back:active {
+      background: #cbd5e0;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============================
+       TABEL (dipakai rekap.html & aspek.html)
+       ============================ */
+    .table-responsive {
+      overflow-x: auto;
+      overflow-y: auto;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    td.text-left {
+      text-align: left;
+    }
+
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 1;
+      border-right: 1px solid var(--border-color);
+      min-width: 150px;
+    }
+
+    th.sticky-col {
+      background: #f8fafc;
+      z-index: 3;
+    }
+
+    /* ============================
+       STATUS WARNA NILAI
+       ============================ */
+    .value-online {
+      color: var(--online-color);
+      font-weight: 700;
+    }
+
+    .value-offline {
+      color: var(--offline-color);
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .value-online::before {
+      content: "✓ ";
+      font-size: 11px;
+    }
+
+    .value-offline::before {
+      content: "⟳ ";
+      font-size: 11px;
+    }
+
+    .value-cell {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .value-cell.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      min-height: 18px;
+    }
+
+    /* ============================
+       LOADING OVERLAY
+       ============================ */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ============================
+       MODAL DASAR (Alert & Konfirmasi)
+       Dipakai di dashboard.html & aspek.html.
+       Modal lain yang lebih spesifik (pilihan hapus/edit/kolom)
+       didefinisikan langsung di aspek.html.
+       ============================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 82vh;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: #edf2f7;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      padding: 8px 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .modal-footer .btn-secondary {
+      flex: 1;
+      background: #edf2f7;
+      color: var(--text-main);
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-footer .btn-main {
+      flex: 2;
+    }
+
+    .modal-footer.stack {
+      flex-direction: column;
+    }
+
+    .modal-footer.stack .btn-secondary,
+    .modal-footer.stack .btn-main,
+    .modal-footer.stack .btn-danger {
+      flex: none;
+      width: 100%;
+    }
+
+
+    /* ============================
+       STYLE KHUSUS HALAMAN INI
+       ============================ */
+    /* ============================
+       INPUT ASPEK TABLE (khusus aspek.html)
+       ============================ */
+    .input-cell {
+      padding: 4px !important;
+    }
+
+    .input-cell input {
+      width: 60px;
+      padding: 8px 4px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      background: #f8fafc;
+    }
+
+    .input-cell input:focus {
+      border-color: var(--primary);
+      outline: none;
+      background: #fff;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+
+    .input-cell select {
+      width: 60px;
+      padding: 8px 4px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #f8fafc;
+      font-size: 14px;
+      text-align: center;
+      appearance: none;
+    }
+
+    .bottom-bar {
+      flex-shrink: 0;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .value-cell.foreign {
+      background: #ebf4ff;
+      color: var(--online-color);
+    }
+
+    .value-cell.foreign.empty {
+      color: var(--text-muted);
+    }
+
+    th.col-foreign {
+      background: #ebf4ff;
+    }
+
+    .col-owner-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--online-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70px;
+      margin: 0 auto;
+    }
+
+    .empty-state-block {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Baris modal Tambah/Edit Penilaian (daftar nilai per siswa) */
+    .modal-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+      gap: 12px;
+    }
+
+    .modal-row:last-child {
+      border-bottom: none;
+    }
+
+    .modal-siswa-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .modal-siswa-nis {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .modal-row input,
+    .modal-row select {
+      width: 80px;
+      flex-shrink: 0;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      background: #f8fafc;
+    }
+
+    .modal-row input:focus,
+    .modal-row select:focus {
+      border-color: var(--primary);
+      outline: none;
+      background: #fff;
+    }
+
+    .modal-row input[type="date"] {
+      width: 160px;
+      text-align: left;
+    }
+
+    .modal-row input[type="date"]:disabled {
+      background: #eef1f5;
+      color: var(--text-muted);
+    }
+
+    .col-actions {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .col-action-btn {
+      border: none;
+      background: #e2e8f0;
+      color: var(--text-main);
+      font-size: 11px;
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .col-action-btn.danger {
+      background: #fed7d7;
+      color: var(--error);
+    }
+
+    .col-action-btn:active {
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER CARD -->
+  <div class="app-header" id="appHeader" style="display:none;">
+    <img id="appLogo" src="" alt="logo" onerror="this.style.visibility='hidden'">
+    <div>
+      <div class="app-title" id="appNamaLembaga">Memuat...</div>
+      <div class="app-subtitle" id="appPeriode"></div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading" class="loading-overlay" style="display:none;">
+    <div style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div id="loadingText" style="margin-top: 16px; font-weight: 600; color: var(--text-main);">Memuat...</div>
+  </div>
+
+  <div class="app-body">
+    <div class="container">
+      <div class="top-nav">
+        <button class="btn-back" onclick="window.location.href='rekap.html'">&larr;</button>
+        <div class="page-title" id="aspekTitle">Input Nilai</div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 12px; margin-bottom:12px; flex-shrink:0;">
+        <div id="aspekSyncStatus" style="font-size:12px; color: var(--text-muted);">Nilai belum pernah disinkron</div>
+        <button id="btnSinkronNilai" onclick="sinkronNilaiAspek()" style="background: var(--primary); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">
+          ⟳ Sinkron Nilai
+        </button>
+      </div>
+
+      <div class="table-responsive" id="tableWrapAspek">
+        <table id="tableAspek">
+          <thead id="theadAspek"></thead>
+          <tbody id="tbodyAspek"></tbody>
+        </table>
+      </div>
+      <div class="table-responsive empty-state-block" id="emptyStateAspek" style="display:none;">
+        Belum ada penilaian. Tekan "+ Tambah Penilaian" di bawah untuk mulai input nilai.
+      </div>
+      <div id="saveMsg" class="status-msg"></div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn-main" onclick="addKolomPenilaian()">+ Tambah Penilaian</button>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIRMASI CUSTOM (ganti confirm()) -->
+  <div id="modalKonfirmasi" class="modal-overlay" style="z-index:1000;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalKonfirmasiTitle">Konfirmasi</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalKonfirmasiMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="modalKonfirmasiResolve_(false)">Batal</button>
+        <button class="btn-main" onclick="modalKonfirmasiResolve_(true)">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PILIHAN HAPUS PENILAIAN (Lokal / Server / Batal) -->
+  <div id="modalPilihanHapus" class="modal-overlay" style="z-index:1000;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalPilihanHapusTitle">Hapus Penilaian</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalPilihanHapusMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer stack">
+        <button class="btn-secondary" onclick="modalPilihanHapusResolve_('lokal')">Hapus Lokal (tanpa internet)</button>
+        <button class="btn-danger" onclick="modalPilihanHapusResolve_('server')">Hapus di Server (butuh internet)</button>
+        <button class="btn-secondary" onclick="modalPilihanHapusResolve_('batal')">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DATA SERVER (tanggal ada di server tapi tidak ada di lokal, saat Sinkron Nilai) -->
+  <div id="modalDataServer" class="modal-overlay" style="z-index:1000;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalDataServerTitle">Data Server</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalDataServerMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer stack">
+        <button class="btn-main" onclick="modalDataServerResolve_('tarik')">1. Tarik Data Server</button>
+        <button class="btn-danger" onclick="modalDataServerResolve_('hapus')">2. Hapus Data Server</button>
+        <button class="btn-secondary" onclick="modalDataServerResolve_('batal')">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PILIHAN EDIT (Edit Lokal / Edit di Server / Batal) -->
+  <div id="modalPilihanEdit" class="modal-overlay" style="z-index:1000;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalPilihanEditTitle">Edit Penilaian</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalPilihanEditMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer stack">
+        <button class="btn-secondary" onclick="modalPilihanEditResolve_('lokal')">Edit Lokal (tanpa internet)</button>
+        <button class="btn-danger" onclick="modalPilihanEditResolve_('server')">Edit di Server (butuh internet)</button>
+        <button class="btn-secondary" onclick="modalPilihanEditResolve_('batal')">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ALERT CUSTOM (ganti alert()) -->
+  <div id="modalAlert" class="modal-overlay" style="z-index:1001;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalAlertTitle">Informasi</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalAlertMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-main" onclick="modalAlertResolve_()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TAMBAH KOLOM PENILAIAN -->
+  <div id="modalKolom" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="modalKolomTitle">Tambah Penilaian</div>
+        <button class="modal-close" onclick="closeModalKolom()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalKolomBody">
+        <!-- Injected -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModalKolom()">Batal</button>
+        <button id="btnSimpanKolom" class="btn-main" onclick="simpanKolomModal()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    // ==========================================
+    // INISIALISASI HALAMAN
+    // ==========================================
+    let currentClass = null;
+    let currentAspek = null;
+    let aspekData = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const ok = await ensureLoggedIn();
+      if (!ok) return; // sudah diarahkan ke index.html oleh ensureLoggedIn()
+
+      currentClass = getCurrentClass();
+      if (!currentClass || !currentClass.kelas || !currentClass.mapel) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      currentAspek = getCurrentAspek();
+      if (!currentAspek) {
+        window.location.href = 'rekap.html';
+        return;
+      }
+
+      loadAppHeaderFromCache();
+      openAspek(currentAspek);
+    });
+
+    // ==========================================
+    // INPUT ASPEK
+    // ==========================================
+    async function openAspek(aspek) {
+      currentAspek = aspek;
+      document.getElementById('aspekTitle').textContent = `Input ${aspek}`;
+
+      showLoading(true, 'Memuat data siswa (offline)...');
+      try {
+        const siswa = await kStorage.getJSON(siswaTag(currentClass.kelas), null);
+        if (!siswa) {
+          showLoading(false);
+          await showAlert('Data siswa belum tersinkron. Kembali ke Dashboard dan tekan "Sinkron Data" terlebih dahulu.', 'Data Belum Tersinkron');
+          window.location.href = 'rekap.html';
+          return;
+        }
+
+        const nilai = await kStorage.getJSON(nilaiTag(currentClass.kelas, currentClass.mapel, aspek), {});
+
+        aspekData = {
+          siswa: siswa,
+          nilai: nilai,
+          daftarKolom: computeDaftarKolom_(nilai)
+        };
+
+        showLoading(false);
+        renderAspekTable();
+        refreshAspekSyncStatus();
+      } catch (e) {
+        showLoading(false);
+        await showAlert('Gagal memuat data: ' + e.message, 'Gagal');
+        window.location.href = 'rekap.html';
+      }
+    }
+
+    // ==========================================
+    // SINKRON NILAI PER ASPEK
+    // ==========================================
+    async function refreshAspekSyncStatus() {
+      const statusEl = document.getElementById('aspekSyncStatus');
+      if (!statusEl || !currentClass || !currentAspek) return;
+      try {
+        const meta = await kStorage.getJSON(nilaiSyncMetaTag(currentClass.kelas, currentClass.mapel, currentAspek), null);
+        statusEl.textContent = (meta && meta.syncedAt) ?
+          'Nilai tersinkron: ' + formatWaktu_(meta.syncedAt) :
+          'Nilai belum pernah disinkron';
+      } catch (e) {
+        statusEl.textContent = '';
+      }
+    }
+
+    async function sinkronNilaiAspek() {
+      if (!currentClass || !currentAspek) return;
+      const btn = document.getElementById('btnSinkronNilai');
+      if (btn) btn.disabled = true;
+
+      const pendingTag = nilaiPendingDeleteTag(currentClass.kelas, currentClass.mapel, currentAspek);
+
+      try {
+        const nilaiLokal = await kStorage.getJSON(nilaiTag(currentClass.kelas, currentClass.mapel, currentAspek), {});
+        const adaDataLokal = nilaiLokal && Object.keys(nilaiLokal).length > 0;
+
+        if (!adaDataLokal) {
+          // Kondisi (a): data nilai belum ada di TinyDB -> tarik penuh dari server.
+          // Turut menarik nilai milik guru lain (mapel yang sama) untuk
+          // ditampilkan -- lihat getAspekNilai() di server (key "tanggal::username").
+          showLoading(true, 'Mengambil data nilai dari server...');
+          const res = await apiCall('getAspekNilai', {
+            kelas: currentClass.kelas,
+            mapel: currentClass.mapel,
+            aspek: currentAspek,
+            username: user.username
+          });
+          showLoading(false);
+
+          if (!res.success) {
+            await showAlert('Gagal mengambil data: ' + res.message, 'Gagal');
+            return;
+          }
+
+          await kStorage.setJSON(nilaiTag(currentClass.kelas, currentClass.mapel, currentAspek), res.nilai || {});
+          await kStorage.setJSON(nilaiSyncMetaTag(currentClass.kelas, currentClass.mapel, currentAspek), { syncedAt: new Date().toISOString() });
+          try { await kStorage.delete(pendingTag); } catch (e) {}
+
+          aspekData.nilai = res.nilai || {};
+          aspekData.daftarKolom = computeDaftarKolom_(aspekData.nilai);
+          renderAspekTable();
+          refreshAspekSyncStatus();
+
+          await showAlert('Data nilai berhasil diambil dari server (termasuk nilai dari guru lain jika ada).', 'Sinkron Berhasil');
+          return;
+        }
+
+        // Kondisi (b): data nilai sudah ada di TinyDB -> ambil dulu data terkini
+        // dari server untuk dibandingkan per TANGGAL PENILAIAN dengan data lokal.
+        showLoading(true, 'Memeriksa data di server...');
+        const cekRes = await apiCall('getAspekNilai', {
+          kelas: currentClass.kelas,
+          mapel: currentClass.mapel,
+          aspek: currentAspek,
+          username: user.username
+        });
+        showLoading(false);
+
+        if (!cekRes.success) {
+          await showAlert('Gagal memeriksa data server: ' + cekRes.message, 'Gagal');
+          return;
+        }
+
+        // Diff HANYA untuk kolom milik sendiri -- guru yang login tidak
+        // berhak menghapus data guru lain di server, jadi tanggal milik
+        // guru lain tidak pernah masuk pemeriksaan/modal ini. Data guru
+        // lain otomatis ikut tertarik & tersimpan di akhir proses ini.
+        const tanggalServer = daftarTanggalMilikSendiri_(cekRes.nilai || {});
+        const tanggalLokalSet = new Set(daftarTanggalMilikSendiri_(nilaiLokal));
+        const tanggalHanyaDiServer = tanggalServer.filter(t => !tanggalLokalSet.has(t));
+
+        let hapusDiServer = false;
+        if (tanggalHanyaDiServer.length) {
+          const daftarTgl = tanggalHanyaDiServer.map(t => formatTanggalPanjang_(t)).join(', ');
+          const pilihan = await showPilihanDataServer(
+            `Terdapat data penilaian Anda di server pada tanggal ${daftarTgl} yang tidak terdapat di lokal.`,
+            'Data Server'
+          );
+          if (!pilihan || pilihan === 'batal') return;
+          hapusDiServer = (pilihan === 'hapus');
+          // pilihan === 'tarik' -> hapusDiServer tetap false, data server pada
+          // tanggal tsb akan ikut ditarik masuk ke lokal setelah sinkron.
+        }
+
+        // Konfirmasi umum: data lokal akan menimpa data server pada tanggal yang sama.
+        const konfirmSinkron = await showKonfirmasi(
+          `Data nilai pada perangkat ini untuk tanggal penilaian yang sama akan MENIMPA data Anda yang sudah ada di server.\n\nLanjutkan sinkronisasi nilai ${currentAspek}?`,
+          'Konfirmasi Sinkron Nilai'
+        );
+        if (!konfirmSinkron) return;
+
+
+        showLoading(true, 'Menyinkronkan nilai ke server...');
+
+        // Jika guru memilih "Hapus Data Server", lakukan sebelum upsert agar
+        // baris yang hanya ada di server itu tidak ikut kebawa lagi saat data
+        // digabung ulang.
+        if (hapusDiServer && tanggalHanyaDiServer.length) {
+          const delRes = await apiCall('deleteAspekNilai', {
+            kelas: currentClass.kelas,
+            mapel: currentClass.mapel,
+            aspek: currentAspek,
+            noPenilaian: tanggalHanyaDiServer,
+            username: user.username
+          });
+          if (!delRes.success) {
+            showLoading(false);
+            await showAlert('Gagal menghapus di server: ' + delRes.message, 'Gagal');
+            return;
+          }
+        }
+
+        const siswa = await kStorage.getJSON(siswaTag(currentClass.kelas), []);
+        const namaByNis = {};
+        siswa.forEach(s => namaByNis[s.nis] = s.nama);
+
+        // Hanya nilai milik SENDIRI (key tanggal polos) yang dikirim ke
+        // server. Nilai milik guru lain yang tersimpan lokal (key
+        // "tanggal::username") murni untuk tampilan, tidak pernah ikut dikirim
+        // supaya kepemilikannya di server tidak berpindah tangan.
+        const flatData = [];
+        Object.keys(nilaiLokal).forEach(nis => {
+          Object.keys(nilaiLokal[nis]).forEach(key => {
+            if (!isKolomMilikSendiri_(key)) return;
+            const val = nilaiLokal[nis][key];
+            if (val !== undefined && val !== null && val !== '') {
+              flatData.push({ nis, nama: namaByNis[nis] || '', noPenilaian: key, nilai: val });
+            }
+          });
+        });
+
+        // "Tarik Data Server": kirim data lokal (upsert) sekaligus menerima
+        // kembali gabungan data server terbaru -- termasuk tanggal yang tadinya
+        // hanya ada di server (baik milik sendiri maupun milik guru lain),
+        // sehingga otomatis "tertarik" masuk ke lokal.
+        // "Hapus Data Server": tanggal milik sendiri tsb sudah dihapus di
+        // server di atas, jadi tidak akan ikut kebawa lagi di hasil gabungan.
+        const res = await apiCall('sinkronNilaiAspek', {
+          kelas: currentClass.kelas,
+          mapel: currentClass.mapel,
+          aspek: currentAspek,
+          data: flatData,
+          username: user.username
+        });
+
+        showLoading(false);
+
+        if (!res.success) {
+          await showAlert('Gagal sinkron: ' + res.message, 'Gagal');
+          return;
+        }
+
+        let nilaiHasil = res.nilai || {};
+
+        if (hapusDiServer && tanggalHanyaDiServer.length) {
+          // Sudah dihapus di server sebelum upsert -- berjaga-jaga jika masih
+          // ikut kebawa di hasil gabungan, buang lagi di sisi client.
+          tanggalHanyaDiServer.forEach(tgl => {
+            Object.keys(nilaiHasil).forEach(nis => {
+              if (nilaiHasil[nis] && nilaiHasil[nis][tgl] !== undefined) {
+                delete nilaiHasil[nis][tgl];
+              }
+            });
+          });
+        }
+
+        await kStorage.setJSON(nilaiTag(currentClass.kelas, currentClass.mapel, currentAspek), nilaiHasil);
+        await kStorage.setJSON(nilaiSyncMetaTag(currentClass.kelas, currentClass.mapel, currentAspek), { syncedAt: new Date().toISOString() });
+        // Status pending-delete lama (dari hapusKolom "Hapus Lokal") sudah
+        // sepenuhnya tercakup oleh pemeriksaan diff di atas -- bersihkan.
+        try { await kStorage.delete(pendingTag); } catch (e) {}
+
+        aspekData.nilai = nilaiHasil;
+        aspekData.daftarKolom = computeDaftarKolom_(aspekData.nilai);
+        renderAspekTable();
+        refreshAspekSyncStatus();
+
+        await showAlert('Sinkron nilai berhasil. Nilai dari guru lain (jika ada) turut ditampilkan.', 'Sinkron Berhasil');
+      } catch (e) {
+        showLoading(false);
+        await showAlert('Gagal sinkron: ' + e.message, 'Gagal');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // Menghasilkan daftar tanggal unik (terurut) dari semua nilai yang ada,
+    // menggantikan skema lama "nomor urut 1..N".
+    // Skema key kolom penilaian:
+    // - Kolom milik guru yang sedang login: key = tanggal polos "YYYY-MM-DD"
+    //   (kompatibel dengan data lama sebelum fitur multi-guru ini ada).
+    // - Kolom milik guru LAIN (mapel sama, username beda): key = "YYYY-MM-DD::username"
+    //   supaya tanggal yang sama antar guru tetap tampil sebagai kolom terpisah.
+    function isKolomMilikSendiri_(key) {
+      return String(key).indexOf('::') === -1;
+    }
+
+    function parseKolomKey_(key) {
+      const s = String(key);
+      const idx = s.indexOf('::');
+      if (idx === -1) return { tanggal: s, username: (user && user.username) || '', milikSendiri: true };
+      return { tanggal: s.slice(0, idx), username: s.slice(idx + 2), milikSendiri: false };
+    }
+
+    // Menghasilkan daftar deskriptor kolom (terurut) dari semua nilai yang ada.
+    // Urutan: berdasarkan tanggal, dan jika ada tanggal yang sama milik lebih
+    // dari satu guru, kolom milik guru yang login ditampilkan lebih dulu.
+    function computeDaftarKolom_(nilaiMap) {
+      const set = new Set();
+      Object.values(nilaiMap || {}).forEach(m => {
+        Object.keys(m || {}).forEach(k => set.add(k));
+      });
+      const kolom = Array.from(set).map(key => {
+        const p = parseKolomKey_(key);
+        return { key: key, tanggal: p.tanggal, username: p.username, milikSendiri: p.milikSendiri };
+      });
+      kolom.sort((a, b) => {
+        if (a.tanggal !== b.tanggal) return a.tanggal < b.tanggal ? -1 : 1;
+        if (a.milikSendiri !== b.milikSendiri) return a.milikSendiri ? -1 : 1;
+        return a.username < b.username ? -1 : (a.username > b.username ? 1 : 0);
+      });
+      return kolom;
+    }
+
+    // Daftar tanggal (bukan key) untuk kolom MILIK SENDIRI saja -- dipakai
+    // saat sinkron untuk membandingkan nilai sendiri di lokal vs di server.
+    // Nilai milik guru lain tidak pernah masuk perbandingan ini karena guru
+    // yang login tidak berhak mengubah/menghapusnya di server.
+    function daftarTanggalMilikSendiri_(nilaiMap) {
+      const set = new Set();
+      Object.values(nilaiMap || {}).forEach(m => {
+        Object.keys(m || {}).forEach(k => { if (isKolomMilikSendiri_(k)) set.add(k); });
+      });
+      return Array.from(set).sort();
+    }
+
+    function todayISO_() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    const NAMA_BULAN_ID_ = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+    function formatTanggalSingkat_(iso) {
+      // Format dd/MM (mis. "15/08"), dipecah langsung dari string ISO
+      // "yyyy-MM-dd" -- tidak melalui objek Date agar kebal dari masalah
+      // parsing/timezone.
+      const parts = String(iso).split('-');
+      if (parts.length === 3) {
+        return parts[2] + '/' + parts[1];
+      }
+      return iso;
+    }
+
+    function formatTanggalPanjang_(iso) {
+      const parts = String(iso).split('-');
+      if (parts.length === 3) {
+        const tahun = parts[0];
+        const bulanIdx = parseInt(parts[1], 10) - 1;
+        const tanggal = parseInt(parts[2], 10);
+        const namaBulan = NAMA_BULAN_ID_[bulanIdx] || parts[1];
+        return `${tanggal} ${namaBulan} ${tahun}`;
+      }
+      return iso;
+    }
+
+    function renderAspekTable() {
+      const thead = document.getElementById('theadAspek');
+      const tbody = document.getElementById('tbodyAspek');
+      const tableWrap = document.getElementById('tableWrapAspek');
+      const emptyState = document.getElementById('emptyStateAspek');
+
+      const daftarKolom = aspekData.daftarKolom || [];
+
+      // Kasus data kosong: dirender sebagai blok teks polos (BUKAN tabel
+      // dengan sticky header/kolom) untuk menghindari bug rendering
+      // "position: sticky" di dalam container "overflow: auto" yang
+      // sering menyebabkan halaman tampil blank putih pada WebView
+      // Android versi lama / perangkat spek rendah.
+      if (daftarKolom.length === 0) {
+        tableWrap.style.display = 'none';
+        emptyState.style.display = 'flex';
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+        return;
+      }
+      tableWrap.style.display = '';
+      emptyState.style.display = 'none';
+
+      let thHTML = `<tr><th class="sticky-col text-left">Nama Siswa</th>`;
+      daftarKolom.forEach(kol => {
+        const label = formatTanggalSingkat_(kol.tanggal);
+        const asing = !kol.milikSendiri;
+        const actionsHTML = asing
+          ? `<button class="col-action-btn danger" onclick="hapusKolom('${kol.key}')" title="Hapus tampilan ${label}">🗑</button>`
+          : `<button class="col-action-btn" onclick="openEditKolom('${kol.key}')" title="Edit ${label}">✎</button>
+             <button class="col-action-btn danger" onclick="hapusKolom('${kol.key}')" title="Hapus ${label}">🗑</button>`;
+        thHTML += `<th class="${asing ? 'col-foreign' : ''}">
+          <div>${label}</div>
+          ${asing ? `<div class="col-owner-label" title="${kol.username}">${kol.username}</div>` : ''}
+          <div class="col-actions">${actionsHTML}</div>
+        </th>`;
+      });
+      thHTML += `</tr>`;
+      thead.innerHTML = thHTML;
+
+      tbody.innerHTML = '';
+
+      aspekData.siswa.forEach(s => {
+        const nMap = aspekData.nilai[s.nis] || {};
+        let tr = document.createElement('tr');
+
+        let tdHTML = `<td class="sticky-col text-left">
+          <div style="font-weight:600; font-size:13px; white-space:normal; word-break:break-word;">${s.nama}</div>
+          <div style="font-size:11px; color:var(--text-muted);">${s.nis}</div>
+        </td>`;
+
+        daftarKolom.forEach(kol => {
+          const val = nMap[kol.key];
+          const hasVal = val !== undefined && val !== '';
+          const asing = !kol.milikSendiri;
+          tdHTML += `<td class="value-cell ${hasVal ? '' : 'empty'} ${asing ? 'foreign' : ''}">${hasVal ? val : '-'}</td>`;
+        });
+
+        tr.innerHTML = tdHTML;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ==========================================
+    // MODAL: TAMBAH / EDIT KOLOM
+    // ==========================================
+    // Modal khusus (Pilihan Hapus, Data Server, Pilihan Edit) yang dipakai
+    // di halaman ini didefinisikan lewat fungsi show*() lokal berikut,
+    // dengan pola yang sama seperti showAlert()/showKonfirmasi() di shared.js.
+    let __modalPilihanHapusResolve = null;
+    function showPilihanHapus(msg, title = 'Hapus Penilaian') {
+      return new Promise(resolve => {
+        __modalPilihanHapusResolve = resolve;
+        document.getElementById('modalPilihanHapusTitle').textContent = title;
+        document.getElementById('modalPilihanHapusMsg').textContent = msg;
+        document.getElementById('modalPilihanHapus').classList.add('active');
+      });
+    }
+    function modalPilihanHapusResolve_(val) {
+      document.getElementById('modalPilihanHapus').classList.remove('active');
+      if (__modalPilihanHapusResolve) { __modalPilihanHapusResolve(val); __modalPilihanHapusResolve = null; }
+    }
+
+    let __modalPilihanEditResolve = null;
+    function showPilihanEdit(msg, title = 'Edit Penilaian') {
+      return new Promise(resolve => {
+        __modalPilihanEditResolve = resolve;
+        document.getElementById('modalPilihanEditTitle').textContent = title;
+        document.getElementById('modalPilihanEditMsg').textContent = msg;
+        document.getElementById('modalPilihanEdit').classList.add('active');
+      });
+    }
+    function modalPilihanEditResolve_(val) {
+      document.getElementById('modalPilihanEdit').classList.remove('active');
+      if (__modalPilihanEditResolve) { __modalPilihanEditResolve(val); __modalPilihanEditResolve = null; }
+    }
+
+    let __modalDataServerResolve = null;
+    function showPilihanDataServer(msg, title = 'Data Server') {
+      return new Promise(resolve => {
+        __modalDataServerResolve = resolve;
+        document.getElementById('modalDataServerTitle').textContent = title;
+        document.getElementById('modalDataServerMsg').textContent = msg;
+        document.getElementById('modalDataServer').classList.add('active');
+      });
+    }
+    function modalDataServerResolve_(val) {
+      document.getElementById('modalDataServer').classList.remove('active');
+      if (__modalDataServerResolve) { __modalDataServerResolve(val); __modalDataServerResolve = null; }
+    }
+
+    // Menandai apakah penyimpanan dari modal kolom yang sedang terbuka akan
+    // langsung dikirim ke server ("Edit di Server") atau hanya disimpan
+    // offline seperti biasa. Selalu direset setiap kali modal kolom dibuka.
+    let modalKolomKeServer = false;
+
+    function addKolomPenilaian() {
+      modalKolomKeServer = false;
+      openKolomModal_(todayISO_(), false);
+    }
+
+    async function openEditKolom(tanggal) {
+      const pilihan = await showPilihanEdit(
+        `Edit nilai pada tanggal ${formatTanggalPanjang_(tanggal)}?\n\n` +
+        `"Edit Lokal" hanya menyimpan perubahan di perangkat ini, tidak butuh internet, dan akan menimpa data di server saat "Sinkron Nilai" berikutnya.\n\n` +
+        `"Edit di Server" langsung mengirim perubahan ke server saat ini juga dan membutuhkan koneksi internet.`,
+        'Edit Penilaian'
+      );
+      if (!pilihan || pilihan === 'batal') return;
+
+      modalKolomKeServer = (pilihan === 'server');
+      openKolomModal_(tanggal, true);
+    }
+
+    function openKolomModal_(tanggal, isEdit) {
+      document.getElementById('modalKolomTitle').textContent =
+        isEdit ? ('Edit Penilaian' + (modalKolomKeServer ? ' (ke Server)' : '') + ' - ' + formatTanggalPanjang_(tanggal)) : 'Tambah Penilaian';
+
+      const body = document.getElementById('modalKolomBody');
+      body.innerHTML = '';
+
+      // Baris pengaturan tanggal penilaian. Saat menambah, tanggal bisa
+      // diatur guru sebelum menyimpan nilai. Saat mengedit kolom yang sudah
+      // ada, tanggal dikunci agar data tidak berpindah kunci penyimpanan.
+      const tglRow = document.createElement('div');
+      tglRow.className = 'modal-row';
+      tglRow.innerHTML = `
+        <div>
+          <div class="modal-siswa-name">Tanggal Penilaian</div>
+        </div>
+        <input type="date" id="modalKolomTanggal" value="${tanggal}" ${isEdit ? 'disabled' : ''}>
+      `;
+      body.appendChild(tglRow);
+
+      aspekData.siswa.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'modal-row';
+
+        const nMap = aspekData.nilai[s.nis] || {};
+        const existingVal = isEdit && nMap[tanggal] !== undefined ? nMap[tanggal] : '';
+
+        let fieldHTML;
+        if (currentAspek === 'KEHADIRAN') {
+          const opts = [{ v: '', label: '-' }, { v: 'H', label: 'H' }, { v: 'S', label: 'S' }, { v: 'I', label: 'I' }, { v: 'A', label: 'A' }];
+          const curUpper = existingVal ? String(existingVal).toUpperCase() : '';
+          fieldHTML = `<select class="siswa-value-input" data-nis="${s.nis}">` +
+            opts.map(o => `<option value="${o.v}" ${o.v === curUpper ? 'selected' : ''}>${o.label}</option>`).join('') +
+            `</select>`;
+        } else {
+          fieldHTML = `<input type="number" min="0" max="100" class="siswa-value-input" data-nis="${s.nis}" value="${existingVal}">`;
+        }
+
+        row.innerHTML = `
+          <div>
+            <div class="modal-siswa-name">${s.nama}</div>
+            <div class="modal-siswa-nis">${s.nis}</div>
+          </div>
+          ${fieldHTML}
+        `;
+        body.appendChild(row);
+      });
+
+      document.getElementById('modalKolom').classList.add('active');
+    }
+
+    function closeModalKolom() {
+      document.getElementById('modalKolom').classList.remove('active');
+      modalKolomKeServer = false;
+    }
+
+    async function simpanKolomModal() {
+      const btn = document.getElementById('btnSimpanKolom');
+      btn.disabled = true;
+
+      const tanggalInput = document.getElementById('modalKolomTanggal');
+      const tanggal = tanggalInput ? tanggalInput.value : '';
+
+      if (!tanggal) {
+        btn.disabled = false;
+        await showAlert('Tanggal penilaian wajib diisi.', 'Perhatian');
+        return;
+      }
+
+      const inputs = document.querySelectorAll('#modalKolomBody .siswa-value-input');
+      const flatData = [];
+
+      inputs.forEach(el => {
+        const val = el.value.trim();
+        if (val !== '') {
+          flatData.push({
+            nis: el.getAttribute('data-nis'),
+            noPenilaian: tanggal,
+            nilai: currentAspek === 'KEHADIRAN' ? val.toUpperCase() : Number(val)
+          });
+        }
+      });
+
+      if (!flatData.length) {
+        btn.disabled = false;
+        await showAlert('Isi minimal satu nilai sebelum menyimpan.', 'Perhatian');
+        return;
+      }
+
+      if (modalKolomKeServer) {
+        // Mode "Edit di Server": kirim langsung ke server saat ini juga.
+        // Hanya nilai kolom ini yang dikirim (upsert), kolom lain milik
+        // sendiri di tanggal berbeda tidak ikut tersentuh.
+        showLoading(true, 'Menyimpan ke server...');
+        const msg = document.getElementById('saveMsg');
+
+        try {
+          const res = await apiCall('sinkronNilaiAspek', {
+            kelas: currentClass.kelas,
+            mapel: currentClass.mapel,
+            aspek: currentAspek,
+            data: flatData,
+            username: user.username
+          });
+
+          if (res.offline) {
+            showLoading(false);
+            await showAlert(
+              'Tidak ada koneksi internet. Untuk menyimpan ke server, pastikan perangkat terhubung ke internet lalu coba lagi.\n\nAnda juga bisa memilih "Edit Lokal" untuk menyimpan di perangkat ini terlebih dahulu.',
+              'Perlu Koneksi Internet'
+            );
+            return;
+          }
+
+          if (!res.success) {
+            showLoading(false);
+            await showAlert('Gagal menyimpan ke server: ' + res.message, 'Gagal');
+            return;
+          }
+
+          const nilaiHasil = res.nilai || {};
+          await kStorage.setJSON(nilaiTag(currentClass.kelas, currentClass.mapel, currentAspek), nilaiHasil);
+          await kStorage.setJSON(nilaiSyncMetaTag(currentClass.kelas, currentClass.mapel, currentAspek), { syncedAt: new Date().toISOString() });
+
+          aspekData.nilai = nilaiHasil;
+          aspekData.daftarKolom = computeDaftarKolom_(aspekData.nilai);
+          renderAspekTable();
+          refreshAspekSyncStatus();
+          closeModalKolom();
+
+          msg.style.color = 'var(--success)';
+          msg.textContent = 'Tersimpan & terkirim ke server ✓';
+          setTimeout(() => msg.textContent = '', 4000);
+        } catch (e) {
+          msg.style.color = 'var(--error)';
+          msg.textContent = 'Gagal: ' + e.message;
+        } finally {
+          showLoading(false);
+          btn.disabled = false;
+        }
+        return;
+      }
+
+      showLoading(true, 'Menyimpan (offline)...');
+      const msg = document.getElementById('saveMsg');
+
+      try {
+        flatData.forEach(item => {
+          if (!aspekData.nilai[item.nis]) aspekData.nilai[item.nis] = {};
+          aspekData.nilai[item.nis][item.noPenilaian] = item.nilai;
+        });
+
+        await kStorage.setJSON(nilaiTag(currentClass.kelas, currentClass.mapel, currentAspek), aspekData.nilai);
+
+        aspekData.daftarKolom = computeDaftarKolom_(aspekData.nilai);
+        renderAspekTable();
+        closeModalKolom();
+
+        msg.style.color = 'var(--success)';
+        msg.textContent = 'Tersimpan offline ✓ (tekan "Sinkron Nilai" di halaman ini untuk mengirim ke server)';
+        setTimeout(() => msg.textContent = '', 4000);
+      } catch (e) {
+        msg.style.color = 'var(--error)';
+        msg.textContent = 'Gagal: ' + e.message;
+      } finally {
+        showLoading(false);
+        btn.disabled = false;
+      }
+    }
+
+    async function hapusKolom(kolomKey) {
+      // Kolom milik GURU LAIN: hanya boleh dihapus dari TinyDB (tampilan di
+      // perangkat ini saja). Tidak ada opsi hapus ke server sama sekali --
+      // guru yang login tidak berhak menghapus data guru lain di server.
+      if (!isKolomMilikSendiri_(kolomKey)) {
+        const p = parseKolomKey_(kolomKey);
+        const msg = document.getElementById('saveMsg');
+
+        const konfirmasi = await showKonfirmasi(
+          `Hapus tampilan nilai tanggal ${formatTanggalPanjang_(p.tanggal)} milik guru ${p.username} dari perangkat ini?\n\n` +
+          `Data ini TIDAK akan terhapus dari server, hanya disembunyikan dari perangkat ini. Nilai ini bisa muncul lagi saat "Sinkron Nilai" berikutnya jika masih ada di server.`,
+          'Hapus dari Perangkat'
+        );
+        if (!konfirmasi) return;
+
+        showLoading(true, 'Menghapus (offline)...');
+        try {
+          Object.keys(aspekData.nilai).forEach(nis => {
+            if (aspekData.nilai[nis][kolomKey] !== undefined) delete aspekData.nilai[nis][kolomKey];
+          });
+
+          await kStorage.setJSON(nilaiTag(currentClass.kelas, currentClass.mapel, currentAspek), aspekData.nilai);
+
+          aspekData.daftarKolom = computeDaftarKolom_(aspekData.nilai);
+          renderAspekTable();
+
+          msg.style.color = 'var(--success)';
+          msg.textContent = `Tampilan nilai tanggal ${formatTanggalPanjang_(p.tanggal)} (guru ${p.username}) dihapus dari perangkat ini ✓`;
+          setTimeout(() => msg.textContent = '', 4000);
+        } catch (e) {
+          msg.style.color = 'var(--error)';
+          msg.textContent = 'Gagal: ' + e.message;
+        } finally {
+          showLoading(false);
+        }
+        return;
+      }
+
+      // Kolom milik SENDIRI: key sama persis dengan tanggal -- alur lama tetap sama.
+      const tanggal = kolomKey;
+
+      const pilihan = await showPilihanHapus(
+        `Hapus semua nilai pada tanggal ${formatTanggalPanjang_(tanggal)}?\n\n` +
+        `"Hapus Lokal" hanya menghapus di perangkat ini, tidak butuh internet, dan akan ditawarkan untuk dihapus juga di server saat "Sinkron Nilai" berikutnya.\n\n` +
+        `"Hapus di Server" langsung menghapus di server saat ini juga dan membutuhkan koneksi internet.`,
+        'Hapus Penilaian'
+      );
+
+      if (!pilihan || pilihan === 'batal') return;
+
+      const msg = document.getElementById('saveMsg');
+
+      if (pilihan === 'lokal') {
+        // Hapus lokal saja -- tidak butuh internet. Ditandai "pending delete"
+        // agar bisa ditawarkan untuk dihapus juga di server saat sinkron nilai
+        // berikutnya (lihat sinkronNilaiAspek()).
+        showLoading(true, 'Menghapus (offline)...');
+        try {
+          Object.keys(aspekData.nilai).forEach(nis => {
+            if (aspekData.nilai[nis][tanggal] !== undefined) delete aspekData.nilai[nis][tanggal];
+          });
+
+          await kStorage.setJSON(nilaiTag(currentClass.kelas, currentClass.mapel, currentAspek), aspekData.nilai);
+
+          const pendingTag = nilaiPendingDeleteTag(currentClass.kelas, currentClass.mapel, currentAspek);
+          const pendingList = await kStorage.getJSON(pendingTag, []);
+          if (!pendingList.includes(String(tanggal))) {
+            pendingList.push(String(tanggal));
+            await kStorage.setJSON(pendingTag, pendingList);
+          }
+
+          aspekData.daftarKolom = computeDaftarKolom_(aspekData.nilai);
+          renderAspekTable();
+
+          msg.style.color = 'var(--success)';
+          msg.textContent = `Penilaian tanggal ${formatTanggalPanjang_(tanggal)} dihapus di perangkat ini ✓ (belum dihapus di server)`;
+          setTimeout(() => msg.textContent = '', 4000);
+        } catch (e) {
+          msg.style.color = 'var(--error)';
+          msg.textContent = 'Gagal: ' + e.message;
+        } finally {
+          showLoading(false);
+        }
+        return;
+      }
+
+      if (pilihan === 'server') {
+        // Hapus langsung di server -- WAJIB terhubung internet saat ini juga.
+        showLoading(true, 'Menghapus di server...');
+        try {
+          const delRes = await apiCall('deleteAspekNilai', {
+            kelas: currentClass.kelas,
+            mapel: currentClass.mapel,
+            aspek: currentAspek,
+            noPenilaian: [tanggal],
+            username: user.username
+          });
+
+          if (delRes.offline) {
+            showLoading(false);
+            await showAlert(
+              'Tidak ada koneksi internet. Untuk menghapus di server, pastikan perangkat terhubung ke internet lalu coba lagi.\n\nAnda juga bisa memilih "Hapus Lokal" untuk menghapus di perangkat ini terlebih dahulu.',
+              'Perlu Koneksi Internet'
+            );
+            return;
+          }
+
+          if (!delRes.success) {
+            showLoading(false);
+            await showAlert('Gagal menghapus di server: ' + delRes.message, 'Gagal');
+            return;
+          }
+
+          // Hapus juga di lokal supaya kolom langsung hilang dari perangkat ini.
+          Object.keys(aspekData.nilai).forEach(nis => {
+            if (aspekData.nilai[nis][tanggal] !== undefined) delete aspekData.nilai[nis][tanggal];
+          });
+          await kStorage.setJSON(nilaiTag(currentClass.kelas, currentClass.mapel, currentAspek), aspekData.nilai);
+
+          // Bersihkan dari daftar pending-delete jika sebelumnya pernah
+          // ditandai (sudah selesai dihapus di server, tidak perlu ditanya lagi).
+          const pendingTag = nilaiPendingDeleteTag(currentClass.kelas, currentClass.mapel, currentAspek);
+          const pendingList = await kStorage.getJSON(pendingTag, []);
+          const idx = pendingList.indexOf(String(tanggal));
+          if (idx !== -1) {
+            pendingList.splice(idx, 1);
+            await kStorage.setJSON(pendingTag, pendingList);
+          }
+
+          aspekData.daftarKolom = computeDaftarKolom_(aspekData.nilai);
+          renderAspekTable();
+          refreshAspekSyncStatus();
+
+          msg.style.color = 'var(--success)';
+          msg.textContent = `Penilaian tanggal ${formatTanggalPanjang_(tanggal)} berhasil dihapus di server ✓`;
+          setTimeout(() => msg.textContent = '', 4000);
+        } catch (e) {
+          msg.style.color = 'var(--error)';
+          msg.textContent = 'Gagal: ' + e.message;
+        } finally {
+          showLoading(false);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>

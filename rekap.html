@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rekap Nilai - Aplikasi Penilaian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       SHARED (sebelumnya shared.css - kini digabung ke file ini)
+       ============================================================ */
+    /* ==========================================================
+       SHARED.CSS
+       Dipakai bersama oleh index.html, dashboard.html, rekap.html,
+       dan aspek.html. Berisi variabel warna, reset dasar, header
+       aplikasi, tombol umum, tabel, modal dasar (alert/konfirmasi),
+       dan loading overlay.
+       ========================================================== */
+
+    :root {
+      --primary: #1a7a5e;
+      --primary-dark: #145f49;
+      --bg-color: #05822d;
+      --card-bg: #ffffff;
+      --text-main: #1a3c34;
+      --text-muted: #666666;
+      --border-color: #e2e8f0;
+      --error: #e53e3e;
+      --success: #38a169;
+      --online-color: #2b6cb0;
+      --offline-color: #ed8936;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: transparent;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ============================
+       HEADER CARD
+       ============================ */
+    .app-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      margin: 5px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border-color: #016922;
+    }
+
+    .app-header img {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .app-header .app-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .app-header .app-subtitle {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .app-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      padding: 5px 5px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ============================
+       TOMBOL UMUM
+       ============================ */
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      background: #086102;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-main:active {
+      background: #075ac7;
+    }
+
+    .btn-main:disabled {
+      background: #d86309;
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* ============================
+       TOP NAV (dipakai rekap.html & aspek.html)
+       ============================ */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-back {
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .btn-back:active {
+      background: #cbd5e0;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============================
+       TABEL (dipakai rekap.html & aspek.html)
+       ============================ */
+    .table-responsive {
+      overflow-x: auto;
+      overflow-y: auto;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    td.text-left {
+      text-align: left;
+    }
+
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 1;
+      border-right: 1px solid var(--border-color);
+      min-width: 150px;
+    }
+
+    th.sticky-col {
+      background: #f8fafc;
+      z-index: 3;
+    }
+
+    /* ============================
+       STATUS WARNA NILAI
+       ============================ */
+    .value-online {
+      color: var(--online-color);
+      font-weight: 700;
+    }
+
+    .value-offline {
+      color: var(--offline-color);
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .value-online::before {
+      content: "✓ ";
+      font-size: 11px;
+    }
+
+    .value-offline::before {
+      content: "⟳ ";
+      font-size: 11px;
+    }
+
+    .value-cell {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .value-cell.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      min-height: 18px;
+    }
+
+    /* ============================
+       LOADING OVERLAY
+       ============================ */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ============================
+       MODAL DASAR (Alert & Konfirmasi)
+       Dipakai di dashboard.html & aspek.html.
+       Modal lain yang lebih spesifik (pilihan hapus/edit/kolom)
+       didefinisikan langsung di aspek.html.
+       ============================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 82vh;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: #edf2f7;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      padding: 8px 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .modal-footer .btn-secondary {
+      flex: 1;
+      background: #edf2f7;
+      color: var(--text-main);
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-footer .btn-main {
+      flex: 2;
+    }
+
+    .modal-footer.stack {
+      flex-direction: column;
+    }
+
+    .modal-footer.stack .btn-secondary,
+    .modal-footer.stack .btn-main,
+    .modal-footer.stack .btn-danger {
+      flex: none;
+      width: 100%;
+    }
+
+
+    /* ============================
+       STYLE KHUSUS HALAMAN INI
+       ============================ */
+    /* ============================
+       MENU ASPEK & REKAP (khusus rekap.html)
+       ============================ */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+
+    .menu-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .menu-btn.kehadiran {
+      grid-column: span 2;
+      background: #2b6cb0;
+    }
+
+    .section-label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER CARD -->
+  <div class="app-header" id="appHeader" style="display:none;">
+    <img id="appLogo" src="" alt="logo" onerror="this.style.visibility='hidden'">
+    <div>
+      <div class="app-title" id="appNamaLembaga">Memuat...</div>
+      <div class="app-subtitle" id="appPeriode"></div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading" class="loading-overlay" style="display:none;">
+    <div style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div id="loadingText" style="margin-top: 16px; font-weight: 600; color: var(--text-main);">Memuat...</div>
+  </div>
+
+  <div class="app-body">
+    <div class="container">
+      <div class="top-nav">
+        <button class="btn-back" onclick="window.location.href='dashboard.html'">&larr;</button>
+        <div class="page-title" id="rekapTitle">Kelas - Mapel</div>
+      </div>
+      <div class="menu-grid">
+        <button class="menu-btn" onclick="bukaAspek('PENGETAHUAN')">Pengetahuan</button>
+        <button class="menu-btn" onclick="bukaAspek('KETERAMPILAN')">Keterampilan</button>
+        <button class="menu-btn" onclick="bukaAspek('SPIRITUAL')">Spiritual</button>
+        <button class="menu-btn" onclick="bukaAspek('SOSIAL')">Sosial</button>
+        <button class="menu-btn kehadiran" onclick="bukaAspek('KEHADIRAN')">Kehadiran</button>
+      </div>
+
+      <div class="section-label">Rekap Nilai</div>
+      <div class="table-responsive">
+        <table id="tableRekap">
+          <thead>
+            <tr>
+              <th class="sticky-col text-left">Nama Siswa</th>
+              <th>Peng.</th>
+              <th>Ket.</th>
+              <th>Spi.</th>
+              <th>Sos.</th>
+              <th>H</th>
+              <th>S</th>
+              <th>I</th>
+              <th>A</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRekap"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    // ==========================================
+    // INISIALISASI HALAMAN
+    // ==========================================
+    let currentClass = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const ok = await ensureLoggedIn();
+      if (!ok) return; // sudah diarahkan ke index.html oleh ensureLoggedIn()
+
+      currentClass = getCurrentClass();
+      if (!currentClass || !currentClass.kelas || !currentClass.mapel) {
+        // Halaman ini dibuka langsung tanpa melalui dashboard -> tidak ada
+        // konteks kelas/mapel yang bisa ditampilkan.
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      loadAppHeaderFromCache();
+      openRekap(currentClass.kelas, currentClass.mapel);
+    });
+
+    // Menyimpan aspek yang dipilih ke sessionStorage, lalu pindah ke
+    // aspek.html (navigasi halaman sungguhan, bukan SPA).
+    function bukaAspek(aspek) {
+      setCurrentAspek(aspek);
+      window.location.href = 'aspek.html';
+    }
+
+    // ==========================================
+    // REKAP & MENU ASPEK
+    // ==========================================
+    async function openRekap(kelas, mapel) {
+      document.getElementById('rekapTitle').textContent = `${kelas} • ${mapel}`;
+
+      const tbody = document.getElementById('tbodyRekap');
+      tbody.innerHTML = '<tr><td colspan="9">Memuat data offline...</td></tr>';
+
+      try {
+        // 1. Ambil data siswa & nilai offline
+        const siswa = await kStorage.getJSON(siswaTag(kelas), null);
+        if (!siswa) {
+          tbody.innerHTML = `<tr><td colspan="9" style="color:red;">Data siswa belum tersinkron. Kembali ke Dashboard dan tekan "Sinkron Data" terlebih dahulu.</td></tr>`;
+          return;
+        }
+
+        const nilaiPerAspek = {};
+        for (const aspek of ASPEK_LIST) {
+          nilaiPerAspek[aspek] = await kStorage.getJSON(nilaiTag(kelas, mapel, aspek), {});
+        }
+
+        // 2. Hitung rekap offline (satu-satunya sumber data - tanpa fetch ke server)
+        const rekapOffline = hitungRekap_(siswa, nilaiPerAspek);
+
+        // 3. Render tabel murni dari data lokal
+        tbody.innerHTML = '';
+        siswa.forEach(s => {
+          const nOff = rekapOffline[s.nis] || {};
+
+          const tr = document.createElement('tr');
+          let html = `<td class="sticky-col text-left">${s.nama}</td>`;
+
+          const fields = ['pengetahuan', 'keterampilan', 'spiritual', 'sosial', 'hadir', 'sakit', 'izin', 'alfa'];
+          fields.forEach(f => {
+            const val = nOff[f];
+            const hasVal = val !== undefined && val !== null && val !== '' && val !== 0;
+            const displayVal = hasVal ? val : '-';
+            const className = 'value-cell' + (hasVal ? '' : ' empty');
+
+            html += `<td class="${className}">${displayVal}</td>`;
+          });
+
+          tr.innerHTML = html;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="9" style="color:red;">${e.message}</td></tr>`;
+      }
+    }
+
+    function hitungRekap_(siswa, nilaiPerAspek) {
+      const calcAvg = (obj) => {
+        const vals = Object.values(obj || {}).map(Number).filter(n => !isNaN(n));
+        if (!vals.length) return 0;
+        return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+      };
+      const countPresence = (obj, code) => {
+        return Object.values(obj || {}).filter(v => String(v).toUpperCase() === code).length;
+      };
+
+      const rekap = {};
+      siswa.forEach(s => {
+        const nis = s.nis;
+        rekap[nis] = {
+          pengetahuan: calcAvg(nilaiPerAspek.PENGETAHUAN[nis]),
+          keterampilan: calcAvg(nilaiPerAspek.KETERAMPILAN[nis]),
+          spiritual: calcAvg(nilaiPerAspek.SPIRITUAL[nis]),
+          sosial: calcAvg(nilaiPerAspek.SOSIAL[nis]),
+          hadir: countPresence(nilaiPerAspek.KEHADIRAN[nis], 'H'),
+          sakit: countPresence(nilaiPerAspek.KEHADIRAN[nis], 'S'),
+          izin: countPresence(nilaiPerAspek.KEHADIRAN[nis], 'I'),
+          alfa: countPresence(nilaiPerAspek.KEHADIRAN[nis], 'A')
+        };
+      });
+      return rekap;
+    }
+  </script>
+</body>
+
+</html>

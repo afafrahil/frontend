@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wali Kelas - Aplikasi Penilaian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       SHARED (sebelumnya shared.css - kini digabung ke file ini)
+       ============================================================ */
+    /* ==========================================================
+       SHARED.CSS
+       Dipakai bersama oleh index.html, dashboard.html, rekap.html,
+       dan aspek.html. Berisi variabel warna, reset dasar, header
+       aplikasi, tombol umum, tabel, modal dasar (alert/konfirmasi),
+       dan loading overlay.
+       ========================================================== */
+
+    :root {
+      --primary: #1a7a5e;
+      --primary-dark: #145f49;
+      --bg-color: #05822d;
+      --card-bg: #ffffff;
+      --text-main: #1a3c34;
+      --text-muted: #666666;
+      --border-color: #e2e8f0;
+      --error: #e53e3e;
+      --success: #38a169;
+      --online-color: #2b6cb0;
+      --offline-color: #ed8936;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: transparent;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ============================
+       HEADER CARD
+       ============================ */
+    .app-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      margin: 5px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border-color: #016922;
+    }
+
+    .app-header img {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .app-header .app-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .app-header .app-subtitle {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .app-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      padding: 5px 5px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ============================
+       TOMBOL UMUM
+       ============================ */
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      background: #086102;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-main:active {
+      background: #075ac7;
+    }
+
+    .btn-main:disabled {
+      background: #d86309;
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* ============================
+       TOP NAV (dipakai rekap.html & aspek.html)
+       ============================ */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-back {
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .btn-back:active {
+      background: #cbd5e0;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============================
+       TABEL (dipakai rekap.html & aspek.html)
+       ============================ */
+    .table-responsive {
+      overflow-x: auto;
+      overflow-y: auto;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    td.text-left {
+      text-align: left;
+    }
+
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 1;
+      border-right: 1px solid var(--border-color);
+      min-width: 150px;
+    }
+
+    th.sticky-col {
+      background: #f8fafc;
+      z-index: 3;
+    }
+
+    /* ============================
+       STATUS WARNA NILAI
+       ============================ */
+    .value-online {
+      color: var(--online-color);
+      font-weight: 700;
+    }
+
+    .value-offline {
+      color: var(--offline-color);
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .value-online::before {
+      content: "✓ ";
+      font-size: 11px;
+    }
+
+    .value-offline::before {
+      content: "⟳ ";
+      font-size: 11px;
+    }
+
+    .value-cell {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .value-cell.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      min-height: 18px;
+    }
+
+    /* ============================
+       LOADING OVERLAY
+       ============================ */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ============================
+       MODAL DASAR (Alert & Konfirmasi)
+       Dipakai di dashboard.html & aspek.html.
+       Modal lain yang lebih spesifik (pilihan hapus/edit/kolom)
+       didefinisikan langsung di aspek.html.
+       ============================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 82vh;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: #edf2f7;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      padding: 8px 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .modal-footer .btn-secondary {
+      flex: 1;
+      background: #edf2f7;
+      color: var(--text-main);
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-footer .btn-main {
+      flex: 2;
+    }
+
+    .modal-footer.stack {
+      flex-direction: column;
+    }
+
+    .modal-footer.stack .btn-secondary,
+    .modal-footer.stack .btn-main,
+    .modal-footer.stack .btn-danger {
+      flex: none;
+      width: 100%;
+    }
+
+
+    /* ============================
+       STYLE KHUSUS HALAMAN INI
+       ============================ */
+    /* ============================
+       RINGKASAN KELAS
+       ============================ */
+    .summary-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .summary-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .summary-box .num {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .summary-box .lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ============================
+       SEARCH
+       ============================ */
+    .search-wrap {
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--card-bg);
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    /* ============================
+       TAB ASPEK
+       ============================ */
+    .aspek-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+      padding-bottom: 2px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .aspek-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .aspek-tab-btn {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.15s;
+    }
+
+    .aspek-tab-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* ============================
+       TABEL SISWA x MAPEL
+       ============================ */
+    .siswa-col {
+      min-width: 140px;
+      text-align: left !important;
+    }
+
+    th.mapel-col {
+      min-width: 84px;
+      max-width: 110px;
+      white-space: normal;
+      line-height: 1.25;
+      font-size: 11px;
+    }
+
+    tbody tr {
+      cursor: pointer;
+    }
+
+    tbody tr:active {
+      background: #f8fafc;
+    }
+
+    .kehadiran-cell {
+      font-weight: 600;
+      font-size: 10.5px;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    .kehadiran-cell span {
+      display: block;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ============================
+       MODAL DETAIL SISWA
+       ============================ */
+    .detail-nama {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .detail-nis {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    #modalDetail .table-responsive {
+      margin-bottom: 0;
+      border-radius: 10px;
+    }
+
+    .mapel-cell {
+      text-align: left !important;
+      white-space: normal !important;
+    }
+
+    .mapel-cell .mapel-nama {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .mapel-cell .mapel-guru {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER CARD -->
+  <div class="app-header" id="appHeader" style="display:none;">
+    <img id="appLogo" src="" alt="logo" onerror="this.style.visibility='hidden'">
+    <div>
+      <div class="app-title" id="appNamaLembaga">Memuat...</div>
+      <div class="app-subtitle" id="appPeriode"></div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading" class="loading-overlay" style="display:none;">
+    <div style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div id="loadingText" style="margin-top: 16px; font-weight: 600; color: var(--text-main);">Memuat...</div>
+  </div>
+
+  <div class="app-body">
+    <div class="container">
+      <div class="top-nav">
+        <button class="btn-back" onclick="window.location.href='dashboard.html'">&larr;</button>
+        <div class="page-title" id="waliKelasTitle">Wali Kelas</div>
+      </div>
+
+      <div class="summary-bar">
+        <div class="summary-box">
+          <div class="num" id="sumSiswa">-</div>
+          <div class="lbl">Siswa</div>
+        </div>
+        <div class="summary-box">
+          <div class="num" id="sumMapel">-</div>
+          <div class="lbl">Mapel</div>
+        </div>
+        <div class="summary-box">
+          <div class="num" id="sumRerata">-</div>
+          <div class="lbl">Rerata Kelas</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; padding:10px 12px; margin-bottom:12px; flex-shrink:0;">
+        <div id="waliKelasSyncStatus" style="font-size:12px; color: var(--text-muted);">Memuat...</div>
+        <button id="btnRefreshWaliKelas" onclick="loadRekapWaliKelas()" style="background: var(--primary); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">
+          ⟳ Refresh
+        </button>
+      </div>
+
+      <div class="search-wrap">
+        <input type="text" id="searchSiswa" placeholder="Cari nama atau NIS siswa..." oninput="renderTabelWaliKelas()">
+      </div>
+
+      <!-- TAB ASPEK -->
+      <div class="aspek-tabs" id="aspekTabs"></div>
+
+      <div class="table-responsive">
+        <table id="tableWaliKelas">
+          <thead>
+            <tr id="theadWaliKelasRow">
+              <th class="sticky-col siswa-col">Nama Siswa</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyWaliKelas">
+            <tr><td class="empty-state">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETAIL NILAI SISWA (semua mapel) -->
+  <div id="modalDetail" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Detail Nilai</div>
+        <button class="modal-close" onclick="closeModalDetail()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalDetailBody" style="padding:16px;">
+        <!-- Injected -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-main" onclick="closeModalDetail()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ALERT CUSTOM (ganti alert()) -->
+  <div id="modalAlert" class="modal-overlay" style="z-index:1001;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalAlertTitle">Informasi</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalAlertMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-main" onclick="modalAlertResolve_()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    // ==========================================
+    // INISIALISASI HALAMAN
+    // ==========================================
+    let currentKelas = null;
+    let waliKelasData = null; // { siswa, mapelList, rekap }
+    let currentAspekWali = 'PENGETAHUAN';
+
+    // Label singkat & nama field nilai per aspek (KEHADIRAN ditangani khusus)
+    const ASPEK_LABEL_WALI = {
+      PENGETAHUAN: 'Pengetahuan',
+      KETERAMPILAN: 'Keterampilan',
+      SPIRITUAL: 'Spiritual',
+      SOSIAL: 'Sosial',
+      KEHADIRAN: 'Kehadiran'
+    };
+    const ASPEK_FIELD_WALI = {
+      PENGETAHUAN: 'pengetahuan',
+      KETERAMPILAN: 'keterampilan',
+      SPIRITUAL: 'spiritual',
+      SOSIAL: 'sosial'
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const ok = await ensureLoggedIn();
+      if (!ok) return;
+
+      currentKelas = getCurrentWaliKelas();
+      if (!currentKelas) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('waliKelasTitle').textContent = `Wali Kelas ${currentKelas}`;
+
+      renderAspekTabsWali();
+      loadAppHeaderFromCache();
+      loadRekapWaliKelas();
+    });
+
+    // ==========================================
+    // TAB ASPEK
+    // ==========================================
+    function renderAspekTabsWali() {
+      const wrap = document.getElementById('aspekTabs');
+      wrap.innerHTML = '';
+      ASPEK_LIST.forEach(aspek => {
+        const btn = document.createElement('button');
+        btn.className = 'aspek-tab-btn' + (aspek === currentAspekWali ? ' active' : '');
+        btn.textContent = ASPEK_LABEL_WALI[aspek] || aspek;
+        btn.onclick = () => {
+          currentAspekWali = aspek;
+          renderAspekTabsWali();
+          renderTabelWaliKelas();
+        };
+        wrap.appendChild(btn);
+      });
+    }
+
+    // ==========================================
+    // AMBIL REKAP (WAJIB ONLINE — halaman ini tidak punya mode offline,
+    // karena datanya adalah gabungan nilai dari banyak guru mapel
+    // lain yang tidak tentu tersedia di TinyDB perangkat wali kelas).
+    // ==========================================
+    async function loadRekapWaliKelas() {
+      const statusEl = document.getElementById('waliKelasSyncStatus');
+      const btn = document.getElementById('btnRefreshWaliKelas');
+      if (btn) btn.disabled = true;
+      showLoading(true, 'Memuat rekap kelas...');
+
+      const res = await apiCall('getRekapWaliKelas', { kelas: currentKelas, username: user.username });
+
+      showLoading(false);
+      if (btn) btn.disabled = false;
+
+      if (res.offline || !res.success) {
+        const pesan = res.offline ?
+          'Halaman Wali Kelas membutuhkan koneksi internet. Pastikan perangkat terhubung, lalu tekan "Refresh".' :
+          (res.message || 'Gagal memuat data.');
+        if (statusEl) statusEl.textContent = 'Tidak terhubung ke server';
+        document.getElementById('theadWaliKelasRow').innerHTML = '<th class="sticky-col siswa-col">Nama Siswa</th>';
+        document.getElementById('tbodyWaliKelas').innerHTML =
+          `<tr><td class="empty-state" style="color:var(--error);">${pesan}</td></tr>`;
+        waliKelasData = null;
+        document.getElementById('sumSiswa').textContent = '-';
+        document.getElementById('sumMapel').textContent = '-';
+        document.getElementById('sumRerata').textContent = '-';
+        return;
+      }
+
+      if (statusEl) statusEl.textContent = 'Data terkini: ' + formatWaktu_(new Date().toISOString());
+
+      waliKelasData = res;
+      document.getElementById('sumSiswa').textContent = res.siswa.length;
+      document.getElementById('sumMapel').textContent = res.mapelList.length;
+      document.getElementById('sumRerata').textContent = hitungRerataKelas_(res);
+
+      renderTabelWaliKelas();
+    }
+
+    // ==========================================
+    // HITUNG BANTUAN
+    // ==========================================
+    function hitungRerataKelas_(res) {
+      const semua = [];
+      res.siswa.forEach(s => {
+        const rekapSiswa = (res.rekap && res.rekap[s.nis]) || {};
+        Object.values(rekapSiswa).forEach(m => {
+          const v = Number(m.pengetahuan);
+          if (!isNaN(v) && v > 0) semua.push(v);
+        });
+      });
+      if (!semua.length) return '-';
+      return Math.round(semua.reduce((a, b) => a + b, 0) / semua.length);
+    }
+
+    // ==========================================
+    // RENDER TABEL: Nama Siswa (baris) x Mata Pelajaran (kolom)
+    // Isi sel mengikuti aspek yang sedang dipilih pada tab.
+    // ==========================================
+    function renderTabelWaliKelas() {
+      const thead = document.getElementById('theadWaliKelasRow');
+      const tbody = document.getElementById('tbodyWaliKelas');
+      if (!waliKelasData) return;
+
+      const mapelList = waliKelasData.mapelList || [];
+
+      // Header: kolom nama siswa + satu kolom per mata pelajaran
+      let headHTML = '<th class="sticky-col siswa-col">Nama Siswa</th>';
+      mapelList.forEach(m => {
+        headHTML += `<th class="mapel-col" title="${m.mapel}${m.guru ? ' — ' + m.guru : ''}">${m.mapel}</th>`;
+      });
+      thead.innerHTML = headHTML;
+
+      const keyword = (document.getElementById('searchSiswa').value || '').trim().toLowerCase();
+      const siswaFiltered = waliKelasData.siswa.filter(s =>
+        !keyword || s.nama.toLowerCase().includes(keyword) || String(s.nis).includes(keyword)
+      );
+
+      if (!siswaFiltered.length) {
+        tbody.innerHTML = `<tr><td class="empty-state" colspan="${mapelList.length + 1}">Tidak ada siswa yang cocok.</td></tr>`;
+        return;
+      }
+
+      if (!mapelList.length) {
+        tbody.innerHTML = `<tr><td class="empty-state" colspan="1">Belum ada mata pelajaran tercatat.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      siswaFiltered.forEach(s => {
+        const rekapSiswa = (waliKelasData.rekap && waliKelasData.rekap[s.nis]) || {};
+
+        const tr = document.createElement('tr');
+        let rowHTML = `<td class="sticky-col siswa-col">${s.nama}</td>`;
+
+        mapelList.forEach(m => {
+          const n = rekapSiswa[m.mapel];
+          rowHTML += renderSelAspekWali_(n);
+        });
+
+        tr.innerHTML = rowHTML;
+        tr.onclick = () => openDetailSiswa(s);
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Membangun satu sel <td> sesuai aspek (tab) yang sedang aktif.
+    function renderSelAspekWali_(n) {
+      if (currentAspekWali === 'KEHADIRAN') {
+        const h = n ? (Number(n.hadir) || 0) : 0;
+        const sk = n ? (Number(n.sakit) || 0) : 0;
+        const iz = n ? (Number(n.izin) || 0) : 0;
+        const al = n ? (Number(n.alfa) || 0) : 0;
+        if (!n || (!h && !sk && !iz && !al)) {
+          return `<td class="value-cell empty">-</td>`;
+        }
+        return `<td class="kehadiran-cell"><span>H:${h} S:${sk}</span><span>I:${iz} A:${al}</span></td>`;
+      }
+
+      const field = ASPEK_FIELD_WALI[currentAspekWali];
+      const v = n ? n[field] : null;
+      const hasVal = v !== undefined && v !== null && v !== '' && v !== 0;
+      return `<td class="value-cell ${hasVal ? '' : 'empty'}">${hasVal ? v : '-'}</td>`;
+    }
+
+    // ==========================================
+    // MODAL DETAIL PER SISWA (semua mapel & aspek — dibuka dgn tap baris)
+    // ==========================================
+    function openDetailSiswa(s) {
+      const body = document.getElementById('modalDetailBody');
+      const rekapSiswa = (waliKelasData.rekap && waliKelasData.rekap[s.nis]) || {};
+
+      let rowsHTML = '';
+      waliKelasData.mapelList.forEach(m => {
+        const n = rekapSiswa[m.mapel];
+        const cell = (v) => {
+          const hasVal = v !== undefined && v !== null && v !== '' && v !== 0;
+          return `<td class="value-cell ${hasVal ? '' : 'empty'}">${hasVal ? v : '-'}</td>`;
+        };
+        rowsHTML += `<tr>
+          <td class="mapel-cell">
+            <div class="mapel-nama">${m.mapel}</div>
+            <div class="mapel-guru">${m.guru || ''}</div>
+          </td>
+          ${cell(n ? n.pengetahuan : null)}
+          ${cell(n ? n.keterampilan : null)}
+          ${cell(n ? n.spiritual : null)}
+          ${cell(n ? n.sosial : null)}
+          ${cell(n ? n.hadir : null)}
+          ${cell(n ? n.sakit : null)}
+          ${cell(n ? n.izin : null)}
+          ${cell(n ? n.alfa : null)}
+        </tr>`;
+      });
+
+      body.innerHTML = `
+        <div class="detail-nama">${s.nama}</div>
+        <div class="detail-nis">NIS: ${s.nis} &bull; Kelas ${currentKelas}</div>
+        <div class="table-responsive" style="max-height:50vh;">
+          <table>
+            <thead>
+              <tr>
+                <th class="text-left">Mapel</th>
+                <th>Peng.</th>
+                <th>Ket.</th>
+                <th>Spi.</th>
+                <th>Sos.</th>
+                <th>H</th>
+                <th>S</th>
+                <th>I</th>
+                <th>A</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHTML || '<tr><td colspan="9" class="empty-state">Belum ada mapel tercatat.</td></tr>'}</tbody>
+          </table>
+        </div>
+      `;
+
+      document.getElementById('modalDetail').classList.add('active');
+    }
+
+    function closeModalDetail() {
+      document.getElementById('modalDetail').classList.remove('active');
+    }
+  </script>
+</body>
+
+</html>

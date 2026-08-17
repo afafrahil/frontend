@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nilai Tahfidz - Aplikasi Penilaian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       SHARED (sebelumnya shared.css - kini digabung ke file ini)
+       ============================================================ */
+    /* ==========================================================
+       SHARED.CSS
+       Dipakai bersama oleh index.html, dashboard.html, rekap.html,
+       dan aspek.html. Berisi variabel warna, reset dasar, header
+       aplikasi, tombol umum, tabel, modal dasar (alert/konfirmasi),
+       dan loading overlay.
+       ========================================================== */
+
+    :root {
+      --primary: #1a7a5e;
+      --primary-dark: #145f49;
+      --bg-color: #05822d;
+      --card-bg: #ffffff;
+      --text-main: #1a3c34;
+      --text-muted: #666666;
+      --border-color: #e2e8f0;
+      --error: #e53e3e;
+      --success: #38a169;
+      --online-color: #2b6cb0;
+      --offline-color: #ed8936;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: transparent;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ============================
+       HEADER CARD
+       ============================ */
+    .app-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      margin: 5px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border-color: #016922;
+    }
+
+    .app-header img {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .app-header .app-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .app-header .app-subtitle {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .app-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      padding: 5px 5px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ============================
+       TOMBOL UMUM
+       ============================ */
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      background: #086102;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-main:active {
+      background: #075ac7;
+    }
+
+    .btn-main:disabled {
+      background: #d86309;
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* ============================
+       TOP NAV (dipakai rekap.html & aspek.html)
+       ============================ */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-back {
+      background: #e2e8f0;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .btn-back:active {
+      background: #cbd5e0;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============================
+       TABEL (dipakai rekap.html & aspek.html)
+       ============================ */
+    .table-responsive {
+      overflow-x: auto;
+      overflow-y: auto;
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    td.text-left {
+      text-align: left;
+    }
+
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 1;
+      border-right: 1px solid var(--border-color);
+      min-width: 150px;
+    }
+
+    th.sticky-col {
+      background: #f8fafc;
+      z-index: 3;
+    }
+
+    /* ============================
+       STATUS WARNA NILAI
+       ============================ */
+    .value-online {
+      color: var(--online-color);
+      font-weight: 700;
+    }
+
+    .value-offline {
+      color: var(--offline-color);
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .value-online::before {
+      content: "✓ ";
+      font-size: 11px;
+    }
+
+    .value-offline::before {
+      content: "⟳ ";
+      font-size: 11px;
+    }
+
+    .value-cell {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .value-cell.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      min-height: 18px;
+    }
+
+    /* ============================
+       LOADING OVERLAY
+       ============================ */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ============================
+       MODAL DASAR (Alert & Konfirmasi)
+       Dipakai di dashboard.html & aspek.html.
+       Modal lain yang lebih spesifik (pilihan hapus/edit/kolom)
+       didefinisikan langsung di aspek.html.
+       ============================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 82vh;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: #edf2f7;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      padding: 8px 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .modal-footer .btn-secondary {
+      flex: 1;
+      background: #edf2f7;
+      color: var(--text-main);
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-footer .btn-main {
+      flex: 2;
+    }
+
+    .modal-footer.stack {
+      flex-direction: column;
+    }
+
+    .modal-footer.stack .btn-secondary,
+    .modal-footer.stack .btn-main,
+    .modal-footer.stack .btn-danger {
+      flex: none;
+      width: 100%;
+    }
+
+
+    /* ============================
+       STYLE KHUSUS HALAMAN INI
+       ============================ */
+    /* ============================
+       SYNC BAR
+       ============================ */
+    .sync-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .sync-bar .sync-status {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .sync-bar button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .sync-bar button:disabled {
+      opacity: 0.6;
+    }
+
+    /* ============================
+       SUMMARY
+       ============================ */
+    .summary-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .summary-box {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .summary-box .num {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .summary-box .lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ============================
+       SEARCH
+       ============================ */
+    .search-wrap {
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--card-bg);
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    /* ============================
+       CARD SISWA
+       ============================ */
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 12px;
+    }
+
+    .siswa-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .siswa-card-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .siswa-card-nis {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .siswa-card-count {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .siswa-card-count.has {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .btn-detail {
+      flex-shrink: 0;
+      background: #e6f4ef;
+      color: var(--primary);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ============================
+       MODAL DETAIL SISWA
+       ============================ */
+    .detail-header {
+      margin-bottom: 4px;
+    }
+
+    .detail-header .nama {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .detail-header .nis {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .history-item {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .history-item.own {
+      background: #e6f4ef;
+      border-color: #b9e0d0;
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .history-waktu {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .history-musrif {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .history-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 11px;
+      background: #fff;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .badge-predikat {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+    }
+
+    .history-baca {
+      font-size: 12px;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .history-catatan {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .history-actions button {
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .btn-hist-edit {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    .btn-hist-hapus {
+      background: #fed7d7;
+      color: var(--error);
+    }
+
+    .btn-tambah-penilaian {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    /* ============================
+       MODAL INPUT NILAI (Tambah/Edit)
+       ============================ */
+    .modal-info-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .modal-info-chip {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .modal-info-chip .lbl {
+      color: var(--text-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .modal-info-chip .val {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .control-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .control-field label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .control-field input,
+    .control-field select {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f8fafc;
+      font-family: inherit;
+    }
+
+    .control-field input:disabled,
+    .control-field select:disabled {
+      background: #eef1f5;
+      color: var(--text-muted);
+    }
+
+    .control-field input:focus,
+    .control-field select:focus {
+      border-color: var(--primary);
+      outline: none;
+      background: #fff;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .bacaan-section {
+      margin-bottom: 16px;
+    }
+
+    .bacaan-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .bacaan-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .field-group input,
+    .field-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f8fafc;
+      font-family: inherit;
+    }
+
+    .field-group input:focus,
+    .field-group select:focus {
+      border-color: var(--primary);
+      outline: none;
+      background: #fff;
+    }
+
+    .form-row {
+      margin-bottom: 14px;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .form-row select,
+    .form-row textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f8fafc;
+      font-family: inherit;
+    }
+
+    .form-row select:focus,
+    .form-row textarea:focus {
+      border-color: var(--primary);
+      outline: none;
+      background: #fff;
+    }
+
+    .form-row textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER CARD -->
+  <div class="app-header" id="appHeader" style="display:none;">
+    <img id="appLogo" src="" alt="logo" onerror="this.style.visibility='hidden'">
+    <div>
+      <div class="app-title" id="appNamaLembaga">Memuat...</div>
+      <div class="app-subtitle" id="appPeriode"></div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading" class="loading-overlay" style="display:none;">
+    <div style="width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div id="loadingText" style="margin-top: 16px; font-weight: 600; color: var(--text-main);">Memuat...</div>
+  </div>
+
+  <div class="app-body">
+    <div class="container">
+      <div class="top-nav">
+        <button class="btn-back" onclick="window.location.href='dashboard.html'">&larr;</button>
+        <div class="page-title" id="halaqohTitle">Nilai Tahfidz</div>
+      </div>
+
+      <div class="sync-bar">
+        <div class="sync-status" id="nilaiSyncStatus">Nilai belum pernah disinkron</div>
+        <button id="btnSinkronNilai" onclick="sinkronNilaiHalaqoh()">⟳ Sinkron Nilai</button>
+      </div>
+
+      <div class="summary-bar">
+        <div class="summary-box">
+          <div class="num" id="sumSiswa">-</div>
+          <div class="lbl">Siswa</div>
+        </div>
+        <div class="summary-box">
+          <div class="num" id="sumRiwayat">-</div>
+          <div class="lbl">Total Riwayat (Lokal)</div>
+        </div>
+      </div>
+
+      <div class="search-wrap">
+        <input type="text" id="searchSiswa" placeholder="Cari nama atau NIS siswa..." oninput="renderCardSiswa()">
+      </div>
+
+      <div class="card-list" id="cardListSiswa">
+        <div class="empty-state">Memuat data...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETAIL SISWA (histori penilaian) -->
+  <div id="modalDetail" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Detail Penilaian</div>
+        <button class="modal-close" onclick="closeModalDetail()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <div class="detail-header">
+          <div class="nama" id="detailNamaSiswa">-</div>
+          <div class="nis" id="detailNisSiswa">-</div>
+        </div>
+        <div class="history-list" id="detailHistoryList"></div>
+        <button class="btn-tambah-penilaian" onclick="bukaModalNilai(null)">+ Tambah Penilaian</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" style="flex:1;" onclick="closeModalDetail()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INPUT / EDIT NILAI -->
+  <div id="modalNilai" class="modal-overlay" style="z-index:1002;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="modalNilaiTitle">Tambah Penilaian Tahfidz</div>
+        <button class="modal-close" onclick="closeModalNilai()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <div class="modal-info-row">
+          <div class="modal-info-chip">
+            <div class="lbl">Siswa</div>
+            <div class="val" id="modalInfoNamaSiswa">-</div>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="control-field">
+            <label>Tanggal &amp; Jam</label>
+            <input type="datetime-local" id="inputWaktu">
+          </div>
+          <div class="control-field">
+            <label>Jenis Evaluasi</label>
+            <select id="inputJenisEvaluasi"></select>
+          </div>
+        </div>
+
+        <div class="bacaan-section">
+          <div class="bacaan-title">Mulai (minimal isi salah satu)</div>
+          <div class="bacaan-grid">
+            <div class="field-group">
+              <label>Surah</label>
+              <select id="mulaiSurah"></select>
+            </div>
+            <div class="field-group">
+              <label>Juz</label>
+              <select id="mulaiJuz"></select>
+            </div>
+            <div class="field-group">
+              <label>Halaman</label>
+              <input type="number" id="mulaiHalaman" inputmode="numeric" placeholder="-">
+            </div>
+            <div class="field-group">
+              <label>Ayat</label>
+              <input type="number" id="mulaiAyat" inputmode="numeric" placeholder="-">
+            </div>
+          </div>
+        </div>
+
+        <div class="bacaan-section">
+          <div class="bacaan-title">Selesai (minimal isi salah satu)</div>
+          <div class="bacaan-grid">
+            <div class="field-group">
+              <label>Surah</label>
+              <select id="selesaiSurah"></select>
+            </div>
+            <div class="field-group">
+              <label>Juz</label>
+              <select id="selesaiJuz"></select>
+            </div>
+            <div class="field-group">
+              <label>Halaman</label>
+              <input type="number" id="selesaiHalaman" inputmode="numeric" placeholder="-">
+            </div>
+            <div class="field-group">
+              <label>Ayat</label>
+              <input type="number" id="selesaiAyat" inputmode="numeric" placeholder="-">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Predikat</label>
+          <select id="inputPredikat"></select>
+        </div>
+
+        <div class="form-row">
+          <label>Status</label>
+          <select id="inputStatus"></select>
+        </div>
+
+        <div class="form-row" style="margin-bottom:0;">
+          <label>Catatan</label>
+          <textarea id="inputCatatan" placeholder="Catatan tambahan (opsional)"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModalNilai()">Batal</button>
+        <button class="btn-main" id="btnSimpanNilai" onclick="simpanNilaiSiswa()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIRMASI CUSTOM (ganti confirm()) -->
+  <div id="modalKonfirmasi" class="modal-overlay" style="z-index:1003;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalKonfirmasiTitle">Konfirmasi</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalKonfirmasiMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="modalKonfirmasiResolve_(false)">Batal</button>
+        <button class="btn-main" onclick="modalKonfirmasiResolve_(true)">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PILIHAN EDIT (Edit Lokal / Edit di Server / Batal) -->
+  <div id="modalPilihanEdit" class="modal-overlay" style="z-index:1003;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title">Edit Penilaian</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalPilihanEditMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer stack">
+        <button class="btn-secondary" onclick="modalPilihanEditResolve_('lokal')">Edit Lokal (tanpa internet)</button>
+        <button class="btn-danger" onclick="modalPilihanEditResolve_('server')">Edit di Server (butuh internet)</button>
+        <button class="btn-secondary" onclick="modalPilihanEditResolve_('batal')">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PILIHAN HAPUS (Hapus Lokal / Hapus di Server / Batal) -->
+  <div id="modalPilihanHapus" class="modal-overlay" style="z-index:1003;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title">Hapus Penilaian</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalPilihanHapusMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer stack">
+        <button class="btn-secondary" onclick="modalPilihanHapusResolve_('lokal')">Hapus Lokal (tanpa internet)</button>
+        <button class="btn-danger" onclick="modalPilihanHapusResolve_('server')">Hapus di Server (butuh internet)</button>
+        <button class="btn-secondary" onclick="modalPilihanHapusResolve_('batal')">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ALERT CUSTOM (ganti alert()) -->
+  <div id="modalAlert" class="modal-overlay" style="z-index:1004;">
+    <div class="modal-card" style="max-height:auto;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalAlertTitle">Informasi</div>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <p id="modalAlertMsg" style="font-size:14px;line-height:1.6;color:var(--text-main);white-space:pre-line;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-main" onclick="modalAlertResolve_()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    // ==========================================
+    // KONFIGURASI HALAMAN (beda dgn nilai-tilawah.html)
+    // ==========================================
+    const KEGIATAN_HALAMAN = 'TAHFIDZ';
+    const HAS_JENIS_EVALUASI = true;
+    const SAVE_ACTION = 'saveNilaiTahfidz';
+
+    // ==========================================
+    // STATE
+    // ==========================================
+    let currentHalaqohInfo = null; // { halaqoh, kegiatan }
+    let daftarSiswa = [];          // dari cache TinyDB (siswaHalaqohTag), diisi oleh sinkronData()
+    let nilaiMap = {};             // NIS -> [ {waktu, jenisEvaluasi, mulai, selesai, predikat, status, catatan, username}, ... ] -- SUMBER: lokal (kStorage)
+    let siswaAktifDetail = null;   // siswa yang sedang dibuka di modal Detail
+    let entriAktifForm = null;     // entri yang sedang di-Tambah/Edit di modal Nilai
+    let formModeServer = false;    // true jika user memilih "Edit di Server"
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const ok = await ensureLoggedIn();
+      if (!ok) return;
+
+      currentHalaqohInfo = getCurrentHalaqoh();
+      if (!currentHalaqohInfo || currentHalaqohInfo.kegiatan !== KEGIATAN_HALAMAN) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('halaqohTitle').textContent = `Nilai Tahfidz - ${currentHalaqohInfo.halaqoh}`;
+
+      isiDropdownJenisEvaluasi();
+      isiDropdownSurah();
+      isiDropdownJuz();
+      isiDropdownPredikatStatus();
+
+      loadAppHeaderFromCache();
+      await muatDataHalaqoh();
+    });
+
+    function isiDropdownJenisEvaluasi() {
+      const sel = document.getElementById('inputJenisEvaluasi');
+      sel.innerHTML = JENIS_EVALUASI_TAHFIDZ_LIST.map(j => `<option value="${j}">${j}</option>`).join('');
+    }
+
+    function isiDropdownSurah() {
+      const opsi = '<option value="">-</option>' + SURAH_LIST.map(s => `<option value="${s}">${s}</option>`).join('');
+      document.getElementById('mulaiSurah').innerHTML = opsi;
+      document.getElementById('selesaiSurah').innerHTML = opsi;
+    }
+
+    function isiDropdownJuz() {
+      const opsi = '<option value="">-</option>' + JUZ_LIST.map(j => `<option value="${j}">${j}</option>`).join('');
+      document.getElementById('mulaiJuz').innerHTML = opsi;
+      document.getElementById('selesaiJuz').innerHTML = opsi;
+    }
+
+    function isiDropdownPredikatStatus() {
+      document.getElementById('inputPredikat').innerHTML =
+        '<option value="">Pilih...</option>' + PREDIKAT_HALAQOH_LIST.map(p => `<option value="${p}">${p}</option>`).join('');
+      document.getElementById('inputStatus').innerHTML =
+        '<option value="">Pilih...</option>' + STATUS_HALAQOH_LIST.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    // ==========================================
+    // MUAT DATA
+    // - Daftar siswa: LOKAL (kStorage, siswaHalaqohTag) -- diisi oleh
+    //   sinkronData() ("Sinkron Data Guru" di dashboard), SAMA seperti
+    //   siswaTag(kelas) untuk kelas/mapel biasa. Tidak ada pemanggilan
+    //   online terpisah di sini.
+    // - Histori nilai: LOKAL (kStorage) -- prinsip PRD "Data lokal menentukan
+    //   apa yang ditampilkan". Jika belum pernah ada data lokal sama sekali
+    //   (pertama kali dibuka), lakukan bootstrap sekali dari server.
+    // ==========================================
+    async function muatDataHalaqoh() {
+      showLoading(true, 'Memuat data siswa (offline)...');
+
+      let siswa = null;
+      try {
+        siswa = await kStorage.getJSON(siswaHalaqohTag(currentHalaqohInfo.halaqoh), null);
+      } catch (e) { }
+
+      showLoading(false);
+
+      if (!siswa) {
+        await showAlert('Data siswa Halaqoh belum tersinkron. Kembali ke Dashboard dan tekan "⟳ Sinkron Data Guru" terlebih dahulu.', 'Data Belum Tersinkron');
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      daftarSiswa = siswa;
+
+      const tag = nilaiHalaqohTag(currentHalaqohInfo.halaqoh, KEGIATAN_HALAMAN);
+      let lokal = null;
+      try { lokal = await kStorage.getJSON(tag, null); } catch (e) {}
+
+      if (lokal) {
+        nilaiMap = lokal;
+      } else {
+        // Belum pernah ada data lokal -- bootstrap sekali dari server (jika online).
+        showLoading(true, 'Mengambil riwayat nilai dari server...');
+        const resNilai = await apiCall('getRekapNilaiHalaqoh', {
+          username: user.username,
+          halaqoh: currentHalaqohInfo.halaqoh
+        });
+        showLoading(false);
+
+        if (resNilai.success) {
+          nilaiMap = resNilai.nilai || {};
+          try {
+            await kStorage.setJSON(tag, nilaiMap);
+            await kStorage.setJSON(nilaiHalaqohSyncMetaTag(currentHalaqohInfo.halaqoh, KEGIATAN_HALAMAN), { syncedAt: new Date().toISOString() });
+          } catch (e) {}
+        } else {
+          nilaiMap = {};
+        }
+      }
+
+      renderCardSiswa();
+      refreshSyncStatusHalaqoh();
+    }
+
+    async function simpanNilaiMapLokal() {
+      const tag = nilaiHalaqohTag(currentHalaqohInfo.halaqoh, KEGIATAN_HALAMAN);
+      await kStorage.setJSON(tag, nilaiMap);
+    }
+
+    // ==========================================
+    // RENDER: DAFTAR CARD SISWA
+    // ==========================================
+    function renderCardSiswa() {
+      const listEl = document.getElementById('cardListSiswa');
+      const keyword = (document.getElementById('searchSiswa').value || '').trim().toLowerCase();
+
+      const siswaFiltered = daftarSiswa.filter(s =>
+        !keyword || s.nama.toLowerCase().includes(keyword) || String(s.nis).includes(keyword)
+      );
+
+      if (!daftarSiswa.length) {
+        listEl.innerHTML = `<div class="empty-state">Belum ada siswa terdaftar di kelompok Halaqoh ini.</div>`;
+        document.getElementById('sumSiswa').textContent = 0;
+        document.getElementById('sumRiwayat').textContent = 0;
+        return;
+      }
+
+      if (!siswaFiltered.length) {
+        listEl.innerHTML = `<div class="empty-state">Tidak ada siswa yang cocok.</div>`;
+        return;
+      }
+
+      let totalRiwayat = 0;
+      listEl.innerHTML = '';
+      siswaFiltered.forEach(s => {
+        const jumlah = (nilaiMap[String(s.nis)] || []).length;
+        totalRiwayat += jumlah;
+
+        const card = document.createElement('div');
+        card.className = 'siswa-card';
+        card.innerHTML = `
+          <div>
+            <div class="siswa-card-name">${s.nama}</div>
+            <div class="siswa-card-nis">${s.nis}</div>
+            <div class="siswa-card-count ${jumlah ? 'has' : ''}">${jumlah ? jumlah + ' riwayat penilaian' : 'Belum ada penilaian'}</div>
+          </div>
+          <button class="btn-detail" data-nis="${s.nis}">Detail</button>
+        `;
+        card.querySelector('.btn-detail').onclick = () => bukaModalDetail(s);
+        listEl.appendChild(card);
+      });
+
+      document.getElementById('sumSiswa').textContent = daftarSiswa.length;
+      let totalRiwayatSemua = 0;
+      daftarSiswa.forEach(s => totalRiwayatSemua += (nilaiMap[String(s.nis)] || []).length);
+      document.getElementById('sumRiwayat').textContent = totalRiwayatSemua;
+    }
+
+    // ==========================================
+    // MODAL: DETAIL SISWA (histori)
+    // ==========================================
+    function bukaModalDetail(siswa) {
+      siswaAktifDetail = siswa;
+      document.getElementById('detailNamaSiswa').textContent = siswa.nama;
+      document.getElementById('detailNisSiswa').textContent = 'NIS: ' + siswa.nis;
+      renderHistoryList();
+      document.getElementById('modalDetail').classList.add('active');
+    }
+
+    function closeModalDetail() {
+      document.getElementById('modalDetail').classList.remove('active');
+      siswaAktifDetail = null;
+      renderCardSiswa();
+    }
+
+    function renderHistoryList() {
+      const wrap = document.getElementById('detailHistoryList');
+      if (!siswaAktifDetail) { wrap.innerHTML = ''; return; }
+
+      const daftar = (nilaiMap[String(siswaAktifDetail.nis)] || [])
+        .slice()
+        .sort((a, b) => String(b.waktu).localeCompare(String(a.waktu)));
+
+      if (!daftar.length) {
+        wrap.innerHTML = `<div class="empty-state">Belum ada riwayat penilaian untuk siswa ini.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = '';
+      daftar.forEach((entri, idx) => {
+        const milikSendiri = String(entri.username || '') === String(user.username || '');
+        const div = document.createElement('div');
+        div.className = 'history-item' + (milikSendiri ? ' own' : '');
+
+        const badges = [];
+        if (HAS_JENIS_EVALUASI && entri.jenisEvaluasi) badges.push(`<span class="badge">${entri.jenisEvaluasi}</span>`);
+        if (entri.predikat) badges.push(`<span class="badge badge-predikat">${entri.predikat}</span>`);
+        if (entri.status) badges.push(`<span class="badge">${entri.status}</span>`);
+
+        const actionsHTML = milikSendiri
+          ? `<button class="btn-hist-edit" data-idx="${idx}">Edit</button>
+             <button class="btn-hist-hapus" data-idx="${idx}">Hapus</button>`
+          : `<button class="btn-hist-hapus" data-idx="${idx}">Hapus dari Lokal</button>`;
+
+        div.innerHTML = `
+          <div class="history-top">
+            <div class="history-waktu">${entri.waktu ? formatTanggalIndo_(entri.waktu) : '-'}</div>
+            <div class="history-musrif">${milikSendiri ? 'Anda' : (entri.username || 'Musrif lain')}</div>
+          </div>
+          <div class="history-badges">${badges.join('')}</div>
+          <div class="history-baca"><strong>Mulai:</strong> ${entri.mulai || '-'}</div>
+          <div class="history-baca"><strong>Selesai:</strong> ${entri.selesai || '-'}</div>
+          ${entri.catatan ? `<div class="history-catatan">"${entri.catatan}"</div>` : ''}
+          <div class="history-actions">${actionsHTML}</div>
+        `;
+
+        if (milikSendiri) {
+          div.querySelector('.btn-hist-edit').onclick = () => bukaModalNilai(entri);
+          div.querySelector('.btn-hist-hapus').onclick = () => hapusEntriSendiri(entri);
+        } else {
+          div.querySelector('.btn-hist-hapus').onclick = () => hapusEntriLokalSaja(entri);
+        }
+
+        wrap.appendChild(div);
+      });
+    }
+
+    // ==========================================
+    // MODAL: TAMBAH / EDIT NILAI
+    // entri === null  -> mode Tambah (selalu disimpan lokal dulu)
+    // entri !== null  -> mode Edit milik sendiri (tanya Lokal/Server dulu)
+    // ==========================================
+    async function bukaModalNilai(entri) {
+      if (entri) {
+        const pilihan = await showPilihanEdit(
+          `Edit penilaian tanggal ${formatTanggalIndo_(entri.waktu)}?\n\n` +
+          `"Edit Lokal" hanya menyimpan perubahan di perangkat ini, tidak butuh internet, dan akan menimpa data di server saat "Sinkron Nilai" berikutnya.\n\n` +
+          `"Edit di Server" langsung mengirim perubahan ke server saat ini juga dan membutuhkan koneksi internet.`
+        );
+        if (!pilihan || pilihan === 'batal') return;
+        formModeServer = (pilihan === 'server');
+      } else {
+        formModeServer = false;
+      }
+
+      entriAktifForm = entri;
+      const isEdit = !!entri;
+
+      document.getElementById('modalNilaiTitle').textContent =
+        isEdit ? ('Edit Penilaian' + (formModeServer ? ' (ke Server)' : ' (Lokal)')) : 'Tambah Penilaian Tahfidz';
+      document.getElementById('modalInfoNamaSiswa').textContent = siswaAktifDetail.nama;
+
+      const waktuInput = document.getElementById('inputWaktu');
+      const jenisInput = document.getElementById('inputJenisEvaluasi');
+
+      waktuInput.value = isEdit ? toDatetimeLocalValue_(entri.waktu) : nowLocalDatetimeInputValue_();
+      // Waktu & Jenis Evaluasi adalah bagian dari kunci unik penilaian di
+      // server -- dikunci saat edit supaya tidak membuat baris baru yang
+      // terpisah dari data lama (padanan tanggal "disabled" saat edit di aspek.html).
+      waktuInput.disabled = isEdit;
+      if (isEdit) jenisInput.value = entri.jenisEvaluasi || JENIS_EVALUASI_TAHFIDZ_LIST[0];
+      jenisInput.disabled = isEdit;
+
+      const mulai = uraiBacaan(isEdit ? entri.mulai : '');
+      const selesai = uraiBacaan(isEdit ? entri.selesai : '');
+
+      document.getElementById('mulaiSurah').value = mulai.surah || '';
+      document.getElementById('mulaiJuz').value = mulai.juz || '';
+      document.getElementById('mulaiHalaman').value = mulai.halaman || '';
+      document.getElementById('mulaiAyat').value = mulai.ayat || '';
+
+      document.getElementById('selesaiSurah').value = selesai.surah || '';
+      document.getElementById('selesaiJuz').value = selesai.juz || '';
+      document.getElementById('selesaiHalaman').value = selesai.halaman || '';
+      document.getElementById('selesaiAyat').value = selesai.ayat || '';
+
+      document.getElementById('inputPredikat').value = isEdit ? (entri.predikat || '') : '';
+      document.getElementById('inputStatus').value = isEdit ? (entri.status || '') : '';
+      document.getElementById('inputCatatan').value = isEdit ? (entri.catatan || '') : '';
+
+      document.getElementById('modalNilai').classList.add('active');
+    }
+
+    function closeModalNilai() {
+      document.getElementById('modalNilai').classList.remove('active');
+      document.getElementById('inputWaktu').disabled = false;
+      document.getElementById('inputJenisEvaluasi').disabled = false;
+      entriAktifForm = null;
+      formModeServer = false;
+    }
+
+    function formatTanggalIndo_(waktu) {
+      try {
+        return new Date(waktu).toLocaleString('id-ID', {
+          day: 'numeric', month: 'long', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+      } catch (e) {
+        return waktu;
+      }
+    }
+
+    function nowLocalDatetimeInputValue_() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // Konversi nilai WAKTU tersimpan (bisa berupa string datetime-local atau
+    // ISO dari server) menjadi format yang valid untuk <input type="datetime-local">.
+    function toDatetimeLocalValue_(waktu) {
+      if (!waktu) return nowLocalDatetimeInputValue_();
+      const s = String(waktu);
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) return s.slice(0, 16);
+      try {
+        const d = new Date(s);
+        if (isNaN(d.getTime())) return nowLocalDatetimeInputValue_();
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      } catch (e) {
+        return nowLocalDatetimeInputValue_();
+      }
+    }
+
+    // Cari & timpa entri MILIK SENDIRI dengan kunci (waktu[+jenisEvaluasi])
+    // yang sama, atau tambahkan baru jika belum ada -- padanan perilaku
+    // upsert di server (lihat saveNilaiHalaqohInternal di halaqoh.js).
+    function upsertEntriLokal_(nis, entriBaru) {
+      const key = String(nis);
+      if (!nilaiMap[key]) nilaiMap[key] = [];
+      const idx = nilaiMap[key].findIndex(e =>
+        String(e.username || '') === String(entriBaru.username || '') &&
+        String(e.waktu) === String(entriBaru.waktu) &&
+        (!HAS_JENIS_EVALUASI || String(e.jenisEvaluasi || '') === String(entriBaru.jenisEvaluasi || ''))
+      );
+      if (idx >= 0) nilaiMap[key][idx] = entriBaru;
+      else nilaiMap[key].push(entriBaru);
+    }
+
+    async function simpanNilaiSiswa() {
+      if (!siswaAktifDetail) return;
+
+      const waktu = document.getElementById('inputWaktu').value;
+      if (!waktu) {
+        await showAlert('Tanggal & jam wajib dipilih.', 'Data Belum Lengkap');
+        return;
+      }
+
+      const jenisEvaluasi = HAS_JENIS_EVALUASI ? document.getElementById('inputJenisEvaluasi').value : undefined;
+
+      const mulai = gabungBacaan(
+        document.getElementById('mulaiSurah').value,
+        document.getElementById('mulaiJuz').value,
+        document.getElementById('mulaiHalaman').value,
+        document.getElementById('mulaiAyat').value
+      );
+      const selesai = gabungBacaan(
+        document.getElementById('selesaiSurah').value,
+        document.getElementById('selesaiJuz').value,
+        document.getElementById('selesaiHalaman').value,
+        document.getElementById('selesaiAyat').value
+      );
+
+      if (!mulai) {
+        await showAlert('Bagian "Mulai" wajib diisi minimal salah satu (Surah/Juz/Halaman/Ayat).', 'Data Belum Lengkap');
+        return;
+      }
+      if (!selesai) {
+        await showAlert('Bagian "Selesai" wajib diisi minimal salah satu (Surah/Juz/Halaman/Ayat).', 'Data Belum Lengkap');
+        return;
+      }
+
+      const predikat = document.getElementById('inputPredikat').value;
+      const status = document.getElementById('inputStatus').value;
+      if (!predikat) {
+        await showAlert('Predikat wajib dipilih.', 'Data Belum Lengkap');
+        return;
+      }
+      if (!status) {
+        await showAlert('Status wajib dipilih.', 'Data Belum Lengkap');
+        return;
+      }
+
+      const catatan = document.getElementById('inputCatatan').value.trim();
+      const nis = siswaAktifDetail.nis;
+      const nama = siswaAktifDetail.nama;
+
+      const entriBaru = { waktu, mulai, selesai, predikat, status, catatan, username: user.username };
+      if (HAS_JENIS_EVALUASI) entriBaru.jenisEvaluasi = jenisEvaluasi;
+
+      const btn = document.getElementById('btnSimpanNilai');
+      btn.disabled = true;
+
+      // Mode "Edit di Server": kirim langsung saat ini juga (butuh internet).
+      if (entriAktifForm && formModeServer) {
+        showLoading(true, 'Menyimpan ke server...');
+        const item = Object.assign({ nis, nama }, entriBaru);
+        delete item.username;
+
+        const res = await apiCall(SAVE_ACTION, {
+          username: user.username,
+          halaqoh: currentHalaqohInfo.halaqoh,
+          data: [item]
+        });
+
+        showLoading(false);
+        btn.disabled = false;
+
+        if (res.offline) {
+          await showAlert('Tidak ada koneksi internet. Untuk menyimpan ke server, pastikan perangkat terhubung ke internet lalu coba lagi.\n\nAnda juga bisa memilih "Edit Lokal" untuk menyimpan di perangkat ini terlebih dahulu.', 'Perlu Koneksi Internet');
+          return;
+        }
+        if (!res.success) {
+          await showAlert(res.message || 'Gagal menyimpan ke server.', 'Gagal');
+          return;
+        }
+
+        upsertEntriLokal_(nis, entriBaru);
+        await simpanNilaiMapLokal();
+        closeModalNilai();
+        renderHistoryList();
+        await showAlert('Penilaian tersimpan & terkirim ke server ✓', 'Berhasil');
+        return;
+      }
+
+      // Mode Tambah baru ATAU Edit Lokal: simpan lokal dulu saja (PRD bag. 4 & 5).
+      showLoading(true, 'Menyimpan (lokal)...');
+      upsertEntriLokal_(nis, entriBaru);
+      await simpanNilaiMapLokal();
+      showLoading(false);
+      btn.disabled = false;
+
+      closeModalNilai();
+      renderHistoryList();
+
+      const pesan = entriAktifForm
+        ? 'Perubahan tersimpan di perangkat ini ✓ (belum dikirim ke server -- tekan "Sinkron Nilai" untuk mengirim)'
+        : 'Penilaian tersimpan di perangkat ini ✓ (belum dikirim ke server -- tekan "Sinkron Nilai" untuk mengirim)';
+      await showAlert(pesan, 'Tersimpan Lokal');
+    }
+
+    // ==========================================
+    // HAPUS: milik sendiri (pilihan Lokal/Server) & milik musrif lain (lokal saja)
+    // ==========================================
+    async function hapusEntriSendiri(entri) {
+      const pilihan = await showPilihanHapus(
+        `Hapus penilaian tanggal ${formatTanggalIndo_(entri.waktu)}?\n\n` +
+        `"Hapus Lokal" hanya menghapus di perangkat ini, tidak butuh internet, dan akan ditawarkan untuk dihapus juga di server saat "Sinkron Nilai" berikutnya.\n\n` +
+        `"Hapus di Server" langsung menghapus di server saat ini juga dan membutuhkan koneksi internet.`
+      );
+      if (!pilihan || pilihan === 'batal') return;
+
+      const nis = String(siswaAktifDetail.nis);
+
+      if (pilihan === 'lokal') {
+        showLoading(true, 'Menghapus (lokal)...');
+        nilaiMap[nis] = (nilaiMap[nis] || []).filter(e => e !== entri);
+        await simpanNilaiMapLokal();
+
+        const pendingTag = nilaiHalaqohPendingDeleteTag(currentHalaqohInfo.halaqoh, KEGIATAN_HALAMAN);
+        const pending = await kStorage.getJSON(pendingTag, []);
+        pending.push({ nis, waktu: entri.waktu, jenisEvaluasi: HAS_JENIS_EVALUASI ? entri.jenisEvaluasi : undefined });
+        await kStorage.setJSON(pendingTag, pending);
+
+        showLoading(false);
+        renderHistoryList();
+        await showAlert('Penilaian dihapus di perangkat ini ✓ (belum dihapus di server)', 'Terhapus Lokal');
+        return;
+      }
+
+      // pilihan === 'server'
+      showLoading(true, 'Menghapus di server...');
+      const item = { nis, waktu: entri.waktu };
+      if (HAS_JENIS_EVALUASI) item.jenisEvaluasi = entri.jenisEvaluasi;
+
+      const res = await apiCall('deleteNilaiHalaqoh', {
+        username: user.username,
+        halaqoh: currentHalaqohInfo.halaqoh,
+        kegiatan: KEGIATAN_HALAMAN,
+        items: [item]
+      });
+      showLoading(false);
+
+      if (res.offline) {
+        await showAlert('Tidak ada koneksi internet. Untuk menghapus di server, pastikan perangkat terhubung ke internet lalu coba lagi.\n\nAnda juga bisa memilih "Hapus Lokal" untuk menghapus di perangkat ini terlebih dahulu.', 'Perlu Koneksi Internet');
+        return;
+      }
+      if (!res.success) {
+        await showAlert(res.message || 'Gagal menghapus di server.', 'Gagal');
+        return;
+      }
+
+      nilaiMap[nis] = (nilaiMap[nis] || []).filter(e => e !== entri);
+      await simpanNilaiMapLokal();
+      renderHistoryList();
+      await showAlert('Penilaian berhasil dihapus di server ✓', 'Berhasil');
+    }
+
+    // Data milik musrif lain: hanya boleh dihapus dari tampilan/lokal
+    // perangkat ini -- TIDAK mengubah data di server (PRD bag. 5).
+    async function hapusEntriLokalSaja(entri) {
+      const konfirmasi = await showKonfirmasi(
+        `Hapus tampilan penilaian tanggal ${formatTanggalIndo_(entri.waktu)} milik musrif ${entri.username || 'lain'} dari perangkat ini?\n\n` +
+        `Data ini TIDAK akan terhapus dari server, hanya disembunyikan dari perangkat ini. Penilaian ini bisa muncul lagi saat "Sinkron Nilai" berikutnya jika masih ada di server.`,
+        'Hapus dari Perangkat'
+      );
+      if (!konfirmasi) return;
+
+      const nis = String(siswaAktifDetail.nis);
+      showLoading(true, 'Menghapus (lokal)...');
+      nilaiMap[nis] = (nilaiMap[nis] || []).filter(e => e !== entri);
+      await simpanNilaiMapLokal();
+      showLoading(false);
+      renderHistoryList();
+    }
+
+    // ==========================================
+    // SINKRON NILAI
+    // ==========================================
+    async function refreshSyncStatusHalaqoh() {
+      const el = document.getElementById('nilaiSyncStatus');
+      if (!el || !currentHalaqohInfo) return;
+      try {
+        const meta = await kStorage.getJSON(nilaiHalaqohSyncMetaTag(currentHalaqohInfo.halaqoh, KEGIATAN_HALAMAN), null);
+        el.textContent = (meta && meta.syncedAt) ? 'Nilai tersinkron: ' + formatWaktu_(meta.syncedAt) : 'Nilai belum pernah disinkron';
+      } catch (e) {
+        el.textContent = '';
+      }
+    }
+
+    async function sinkronNilaiHalaqoh() {
+      const btn = document.getElementById('btnSinkronNilai');
+      if (btn) btn.disabled = true;
+
+      const konfirmasi = await showKonfirmasi(
+        'Data penilaian Anda di perangkat ini akan MENIMPA data Anda yang sudah ada di server.\n\nLanjutkan sinkronisasi nilai Tahfidz?',
+        'Konfirmasi Sinkron Nilai'
+      );
+      if (!konfirmasi) { if (btn) btn.disabled = false; return; }
+
+      const halaqoh = currentHalaqohInfo.halaqoh;
+      const tag = nilaiHalaqohTag(halaqoh, KEGIATAN_HALAMAN);
+      const pendingTag = nilaiHalaqohPendingDeleteTag(halaqoh, KEGIATAN_HALAMAN);
+      const namaByNis = {};
+      daftarSiswa.forEach(s => namaByNis[s.nis] = s.nama);
+
+      try {
+        // 1. Kirim penghapusan lokal yang tertunda (milik sendiri) terlebih dahulu.
+        const pending = await kStorage.getJSON(pendingTag, []);
+        if (pending.length) {
+          showLoading(true, 'Menghapus data tertunda di server...');
+          const delRes = await apiCall('deleteNilaiHalaqoh', {
+            username: user.username,
+            halaqoh,
+            kegiatan: KEGIATAN_HALAMAN,
+            items: pending
+          });
+          if (!delRes.success) {
+            showLoading(false);
+            await showAlert('Gagal menghapus data tertunda di server: ' + delRes.message, 'Gagal');
+            return;
+          }
+        }
+
+        // 2. Kirim semua penilaian milik sendiri yang ada di lokal (upsert).
+        const flatData = [];
+        Object.keys(nilaiMap).forEach(nis => {
+          (nilaiMap[nis] || []).forEach(e => {
+            if (String(e.username || '') !== String(user.username || '')) return;
+            const item = { nis, nama: namaByNis[nis] || '', waktu: e.waktu, mulai: e.mulai, selesai: e.selesai, predikat: e.predikat, status: e.status, catatan: e.catatan };
+            if (HAS_JENIS_EVALUASI) item.jenisEvaluasi = e.jenisEvaluasi;
+            flatData.push(item);
+          });
+        });
+
+        if (flatData.length) {
+          showLoading(true, 'Mengirim penilaian ke server...');
+          const res = await apiCall(SAVE_ACTION, { username: user.username, halaqoh, data: flatData });
+          if (res.offline) {
+            showLoading(false);
+            await showAlert('Tidak ada koneksi internet. Pastikan perangkat terhubung ke internet lalu coba lagi.', 'Perlu Koneksi Internet');
+            return;
+          }
+          if (!res.success) {
+            showLoading(false);
+            await showAlert('Gagal mengirim penilaian: ' + res.message, 'Gagal');
+            return;
+          }
+        }
+
+        // 3. Ambil data terbaru dari server (milik sendiri + musrif lain).
+        showLoading(true, 'Mengambil data terbaru dari server...');
+        const pull = await apiCall('getRekapNilaiHalaqoh', { username: user.username, halaqoh });
+        showLoading(false);
+
+        if (!pull.success) {
+          await showAlert('Gagal mengambil data terbaru: ' + pull.message, 'Gagal');
+          return;
+        }
+
+        nilaiMap = pull.nilai || {};
+        await kStorage.setJSON(tag, nilaiMap);
+        await kStorage.setJSON(nilaiHalaqohSyncMetaTag(halaqoh, KEGIATAN_HALAMAN), { syncedAt: new Date().toISOString() });
+        try { await kStorage.delete(pendingTag); } catch (e) {}
+
+        renderCardSiswa();
+        if (siswaAktifDetail) renderHistoryList();
+        refreshSyncStatusHalaqoh();
+
+        await showAlert('Sinkron nilai berhasil. Penilaian dari musrif lain (jika ada) turut ditampilkan.', 'Sinkron Berhasil');
+      } catch (e) {
+        showLoading(false);
+        await showAlert('Gagal sinkron: ' + e.message, 'Gagal');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // ==========================================
+    // MODAL LOKAL: PILIHAN EDIT / HAPUS (padanan pola show*() di aspek.html)
+    // ==========================================
+    let __modalPilihanEditResolve = null;
+    function showPilihanEdit(msg) {
+      return new Promise(resolve => {
+        __modalPilihanEditResolve = resolve;
+        document.getElementById('modalPilihanEditMsg').textContent = msg;
+        document.getElementById('modalPilihanEdit').classList.add('active');
+      });
+    }
+    function modalPilihanEditResolve_(val) {
+      document.getElementById('modalPilihanEdit').classList.remove('active');
+      if (__modalPilihanEditResolve) { __modalPilihanEditResolve(val); __modalPilihanEditResolve = null; }
+    }
+
+    let __modalPilihanHapusResolve = null;
+    function showPilihanHapus(msg) {
+      return new Promise(resolve => {
+        __modalPilihanHapusResolve = resolve;
+        document.getElementById('modalPilihanHapusMsg').textContent = msg;
+        document.getElementById('modalPilihanHapus').classList.add('active');
+      });
+    }
+    function modalPilihanHapusResolve_(val) {
+      document.getElementById('modalPilihanHapus').classList.remove('active');
+      if (__modalPilihanHapusResolve) { __modalPilihanHapusResolve(val); __modalPilihanHapusResolve = null; }
+    }
+  </script>
+</body>
+
+</html>
